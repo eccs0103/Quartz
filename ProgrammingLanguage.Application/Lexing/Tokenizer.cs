@@ -53,7 +53,6 @@ public partial class Tokenizer
 			{
 				Match match = regex.Match(text.ToString());
 				if (!match.Success) continue;
-
 				(string value, int length) = match;
 				text.Remove(0, length);
 
@@ -71,7 +70,7 @@ public partial class Tokenizer
 				hasChanges = true;
 				break;
 			}
-			if (!hasChanges) throw new UnidentifiedTermIssue(begin >> new MutablePosition(begin).Increment(text[0]).ToImmutable());
+			if (!hasChanges) throw new UnidentifiedTermIssue(begin >> begin);
 		}
 		return [.. tokens];
 	}
