@@ -57,7 +57,7 @@ public partial class Tokenizer
 				(string value, int length) = match;
 				text.Remove(0, length);
 
-				Position end = value.Aggregate(new MutablePosition(begin), (position, symbol) => position.IncrementBySymbol(symbol)).Seal();
+				Position end = new MutablePosition(begin).Increment(value).ToImmutable();
 				if (unknown is Types type)
 				{
 					if (type == Types.Identifier && Keywords.Contains(value))
@@ -71,7 +71,7 @@ public partial class Tokenizer
 				hasChanges = true;
 				break;
 			}
-			if (!hasChanges) throw new Issue($"Unidentified term '{text[0]}'", begin);
+			if (!hasChanges) throw new UnidentifiedTermIssue(begin >> new MutablePosition(begin).Increment(text[0]).ToImmutable());
 		}
 		return [.. tokens];
 	}

@@ -27,13 +27,19 @@ public class MutablePosition(uint column, uint line) : Position(column, line)
 		return this;
 	}
 
-	public MutablePosition IncrementBySymbol(char symbol)
+	public MutablePosition Increment(in char symbol)
 	{
 		if (symbol == '\n') return IncrementLine();
 		return IncrementColumn();
 	}
 
-	public Position Seal()
+	public MutablePosition Increment(IEnumerable<char> text)
+	{
+		foreach (char symbol in text) Increment(symbol);
+		return this;
+	}
+
+	public Position ToImmutable()
 	{
 		return new(Column, Line);
 	}

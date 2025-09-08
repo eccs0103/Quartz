@@ -2,7 +2,7 @@
 
 namespace ProgrammingLanguage.Application.Exceptions;
 
-public class Issue(string message, Position position) : Exception($"{message} at {position}")
+public abstract class Issue(string message, Range<Position> range) : Exception($"{message} {range}")
 {
-	public Position Position { get; } = position;
+	public readonly Range<Position> Range = range;
 }

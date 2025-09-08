@@ -13,4 +13,9 @@ public class Range<T>(in T begin, in T end)
 	{
 		return $"from {Begin} to {End}";
 	}
+
+	public static Range<T> operator >>(Range<T> from, Range<T> to)
+	{
+		return new(from.Begin, to.End);
+	}
 }

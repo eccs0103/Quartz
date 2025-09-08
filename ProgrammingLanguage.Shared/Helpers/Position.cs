@@ -11,5 +11,10 @@ public class Position(in uint column, in uint line)
 	{
 		return $"line {Line + 1} column {Column + 1}";
 	}
+
+	public static Range<Position> operator >>(Position from, Position to)
+	{
+		return new(from, to);
+	}
 }
 
