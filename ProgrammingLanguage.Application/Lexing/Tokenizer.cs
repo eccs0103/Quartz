@@ -63,7 +63,7 @@ public partial class Tokenizer
 					{
 						type = Types.Keyword;
 					}
-					tokens.Add(new(type, value, new(begin, end)));
+					tokens.Add(new(type, value, begin >> end));
 				}
 				begin = end;
 

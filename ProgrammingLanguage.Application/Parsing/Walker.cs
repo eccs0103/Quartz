@@ -18,7 +18,7 @@ public class Walker(Token[] tokens, Range<uint> range)
 		set => IndexWrapper.Value = value;
 	}
 	public bool InRange => Max(RangeIndex.Begin, 0) <= Index && Index < Min(Tokens.Length, RangeIndex.End);
-	public readonly Range<Position> RangePosition = new(tokens.FirstOrDefault()?.RangePosition.Begin ?? Position.Zero, tokens.LastOrDefault()?.RangePosition.End ?? Position.Zero);
+	public readonly Range<Position> RangePosition = (tokens.FirstOrDefault()?.RangePosition.Begin ?? Position.Zero) >> (tokens.LastOrDefault()?.RangePosition.End ?? Position.Zero);
 
 	public bool GetToken(out Token token)
 	{
