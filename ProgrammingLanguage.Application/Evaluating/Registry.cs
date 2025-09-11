@@ -15,6 +15,15 @@ public class Registry
 		return true;
 	}
 
+	public bool TryWrite(string name, object? value)
+	{
+		if (!Database.TryGetValue(name, out Datum? datum)) return false;
+		if (!datum.Mutable) return false;
+		datum.Value = value;
+		Database[name] = datum;
+		return true;
+	}
+
 	public bool TryDeclareConstant(string type, string name, object? value, out Datum? datum)
 	{
 		Datum constant = new(type, value, false);

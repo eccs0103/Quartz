@@ -44,8 +44,8 @@ public partial class Tokenizer
 
 	public Token[] Tokenize(string code)
 	{
-		Position begin = new(0, 0);
 		List<Token> tokens = [];
+		Position begin = new(0, 0);
 		for (StringBuilder text = new(code); text.Length > 0;)
 		{
 			bool hasChanges = false;

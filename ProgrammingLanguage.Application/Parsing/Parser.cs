@@ -17,13 +17,31 @@ public class Parser
 	{
 		List<Node> trees = [];
 		Walker walker = new(tokens, new(0, Convert.ToUInt32(tokens.Length)));
-		while (walker.InRange)
+		uint begin = walker.Index;
+		while (true)
 		{
-			Node tree = StatementParse(walker);
-			if (!walker.GetToken(out Token token) || !token.Represents(Types.Separator, ";")) throw new Issue("Expected ';'", walker.RangePosition.End);
+			if (!walker.GetToken(out Token token)) throw new Issue("Expected ';'", walker.RangePosition.End);
+			if (!token.Represents(Types.Separator, ";"))
+			{
+				walker.Index++;
+				continue;
+			}
+			uint end = walker.Index;
+			walker.Index = begin;
+			Walker subwalker = walker.GetSubwalker(begin, end);
+			Node tree = StatementParse(subwalker);
 			trees.Add(tree);
-			walker.Index++;
+			if (subwalker.InRange) throw new Issue("Expected ';'", walker.RangePosition.End);
+			break;
 		}
+
+		// while (walker.InRange)
+		// {
+		// 	Node tree = StatementParse(walker);
+		// 	if (!walker.GetToken(out Token token) || !token.Represents(Types.Separator, ";")) throw new Issue("Expected ';'", walker.RangePosition.End);
+		// 	trees.Add(tree);
+		// 	walker.Index++;
+		// }
 		return trees;
 	}
 
@@ -31,7 +49,12 @@ public class Parser
 	{
 		if (!walker.GetToken(out Token token)) throw new Issue("Expected statement", walker.RangePosition.Begin);
 		if (token.Represents(Types.Keyword, "datum")) return DeclarationParse(walker);
-		return ExpressionParse(walker);
+		if (!token.Represents(Types.Identifier)) return ExpressionParse(walker);
+		walker.Index++;
+		bool isNotColon = !walker.GetToken(out Token next) || !next.Represents(Types.Operator, ":");
+		walker.Index--;
+		if (isNotColon) return ExpressionParse(walker);
+		return AssignmentParse(walker);
 	}
 
 	private DeclarationNode DeclarationParse(Walker walker)
@@ -52,7 +75,22 @@ public class Parser
 
 		walker.Index++;
 		Node value = ExpressionParse(walker);
+
 		return new DeclarationNode(identifier, value, new(token1.RangePosition.Begin, value.RangePosition.End));
+	}
+
+	private BinaryOperatorNode AssignmentParse(Walker walker)
+	{
+		if (!walker.GetToken(out Token token) || !token.Represents(Types.Identifier)) throw new Issue("Expected identifier", walker.RangePosition.Begin);
+		IdentifierNode identifier = new(token.Value, token.RangePosition);
+		walker.Index++;
+
+		if (!walker.GetToken(out Token colonToken) || !colonToken.Represents(Types.Operator, ":")) throw new Issue("Expected ':'", token.RangePosition.End);
+		walker.Index++;
+
+		Node value = ExpressionParse(walker);
+
+		return new BinaryOperatorNode(":", identifier, value, identifier.RangePosition.Begin >> value.RangePosition.End);
 	}
 
 	private Node ExpressionParse(Walker walker)
@@ -88,14 +126,10 @@ public class Parser
 
 	private Node UnaryParse(Walker walker)
 	{
-		if (!walker.GetToken(out Token token)) throw new Issue("Expected expression", walker.RangePosition.Begin);
-		if (token.Represents(Types.Operator, "+", "-"))
-		{
-			walker.Index++;
-			Node target = UnaryParse(walker);
-			return new UnaryOperatorNode(token.Value, target, new(token.RangePosition.Begin, target.RangePosition.End));
-		}
-		return PrimaryParse(walker);
+		if (!walker.GetToken(out Token token) || !token.Represents(Types.Operator, "+", "-")) return PrimaryParse(walker);
+		walker.Index++;
+		Node target = PrimaryParse(walker);
+		return new UnaryOperatorNode(token.Value, target, new(token.RangePosition.Begin, target.RangePosition.End));
 	}
 
 	private Node PrimaryParse(Walker walker)

@@ -90,15 +90,41 @@ public class Evaluator : IEvaluatorVisitor<ValueNode>
 		// default: throw new Issue($"Unidentified '{Operator}' operator", RangePosition.Begin);
 		// }
 
-		ValueNode left = node.Left.Accept(this);
-		ValueNode right = node.Right.Accept(this);
+		
 
 		switch (node.Operator)
 		{
-		case "+": return new ValueNode(left.ValueAs<double>() + right.ValueAs<double>(), node.RangePosition);
-		case "-": return new ValueNode(left.ValueAs<double>() - right.ValueAs<double>(), node.RangePosition);
-		case "*": return new ValueNode(left.ValueAs<double>() * right.ValueAs<double>(), node.RangePosition);
-		case "/": return new ValueNode(left.ValueAs<double>() / right.ValueAs<double>(), node.RangePosition);
+		case "+":
+		{
+			ValueNode left = node.Left.Accept(this);
+			ValueNode right = node.Right.Accept(this);
+			return new ValueNode(left.ValueAs<double>() + right.ValueAs<double>(), node.RangePosition);
+		}
+		case "-":
+		{
+			ValueNode left = node.Left.Accept(this);
+			ValueNode right = node.Right.Accept(this);
+			return new ValueNode(left.ValueAs<double>() - right.ValueAs<double>(), node.RangePosition);
+		}
+		case "*":
+		{
+			ValueNode left = node.Left.Accept(this);
+			ValueNode right = node.Right.Accept(this);
+			return new ValueNode(left.ValueAs<double>() * right.ValueAs<double>(), node.RangePosition);
+		}
+		case "/":
+		{
+			ValueNode left = node.Left.Accept(this);
+			ValueNode right = node.Right.Accept(this);
+			return new ValueNode(left.ValueAs<double>() / right.ValueAs<double>(), node.RangePosition);
+		}
+		case ":":
+		{
+			// IdentifierNode left = node.Left.Accept(this);
+			// ValueNode right = node.Right.Accept(this);
+			// if (Memory.TryWrite(left.Name, right.Value)) throw new Issue($"Identifier '{left.Name}' does not exist or is non-mutable", node.RangePosition.Begin);
+			return ValueNode.NullAt(node.RangePosition);
+		}
 		default: throw new Issue($"Unidentified '{node.Operator}' operator", node.RangePosition.Begin);
 		}
 	}
