@@ -14,13 +14,13 @@ public class MutablePosition(uint column, uint line) : Position(column, line)
 		return $"line {Line + 1} column {Column + 1}";
 	}
 
-	public MutablePosition IncrementColumn()
+	private MutablePosition IncrementColumn()
 	{
 		Column++;
 		return this;
 	}
 
-	public MutablePosition IncrementLine()
+	private MutablePosition IncrementLine()
 	{
 		Line++;
 		Column = 0;

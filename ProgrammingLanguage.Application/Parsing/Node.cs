@@ -3,9 +3,9 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-public abstract class Node(Range<Position> range)
+internal abstract class Node(Range<Position> range)
 {
 	public readonly Range<Position> RangePosition = range;
 
-	public abstract T Accept<T>(IEvaluatorVisitor<T> visitor);
+	public abstract T Accept<T>(IResolverVisitor<T> visitor);
 }

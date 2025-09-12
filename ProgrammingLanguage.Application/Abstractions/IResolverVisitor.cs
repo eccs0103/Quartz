@@ -2,7 +2,7 @@ using ProgrammingLanguage.Application.Parsing;
 
 namespace ProgrammingLanguage.Application.Abstractions;
 
-public interface IEvaluatorVisitor<T>
+internal interface IResolverVisitor<out T>
 {
 	public T Visit(ValueNode node);
 	public T Visit(IdentifierNode node);

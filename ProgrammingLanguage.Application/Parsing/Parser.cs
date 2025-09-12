@@ -6,7 +6,7 @@ using static ProgrammingLanguage.Application.Lexing.Token;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-public class Parser
+internal class Parser
 {
 	private static readonly Dictionary<string, string> Brackets = new()
 	{
@@ -16,38 +16,21 @@ public class Parser
 	public List<Node> Parse(Token[] tokens)
 	{
 		List<Node> trees = [];
-		Walker walker = new(tokens, new(0, Convert.ToUInt32(tokens.Length)));
-		uint begin = walker.Index;
-		while (true)
+		Walker walker = new(tokens);
+		while (walker.InRange)
 		{
-			if (!walker.GetToken(out Token token)) throw new Issue("Expected ';'", walker.RangePosition.End);
-			if (!token.Represents(Types.Separator, ";"))
-			{
-				walker.Index++;
-				continue;
-			}
-			uint end = walker.Index;
-			walker.Index = begin;
-			Walker subwalker = walker.GetSubwalker(begin, end);
-			Node tree = StatementParse(subwalker);
+			Node tree = StatementParse(walker);
+			if (!walker.GetToken(out Token token)) throw new ExpectedIssue(";", walker.RangePosition.End);
+			if (!token.Represents(Types.Separator, ";")) throw new ExpectedIssue(";", token.RangePosition);
 			trees.Add(tree);
-			if (subwalker.InRange) throw new Issue("Expected ';'", walker.RangePosition.End);
-			break;
+			walker.Index++;
 		}
-
-		// while (walker.InRange)
-		// {
-		// 	Node tree = StatementParse(walker);
-		// 	if (!walker.GetToken(out Token token) || !token.Represents(Types.Separator, ";")) throw new Issue("Expected ';'", walker.RangePosition.End);
-		// 	trees.Add(tree);
-		// 	walker.Index++;
-		// }
 		return trees;
 	}
 
 	private Node StatementParse(Walker walker)
 	{
-		if (!walker.GetToken(out Token token)) throw new Issue("Expected statement", walker.RangePosition.Begin);
+		if (!walker.GetToken(out Token token)) throw new ExpectedIssue("statement", walker.RangePosition.Begin);
 		if (token.Represents(Types.Keyword, "datum")) return DeclarationParse(walker);
 		if (!token.Represents(Types.Identifier)) return ExpressionParse(walker);
 		walker.Index++;
@@ -62,35 +45,35 @@ public class Parser
 		walker.GetToken(out Token token1);
 		walker.Index++;
 
-		if (!walker.GetToken(out Token token2)) throw new Issue("Expected identifier", token1.RangePosition.End);
-		if (!token2.Represents(Types.Identifier)) throw new Issue("Expected identifier", token2.RangePosition.Begin);
+		if (!walker.GetToken(out Token token2)) throw new ExpectedIssue("identifier", token1.RangePosition.End);
+		if (!token2.Represents(Types.Identifier)) throw new ExpectedIssue("identifier", token2.RangePosition);
 		IdentifierNode identifier = new(token2.Value, token2.RangePosition);
 		walker.Index++;
 
 		if (!walker.GetToken(out Token token) || !token.Represents(Types.Operator, ":"))
 		{
 			ValueNode nullable = ValueNode.NullAt(token2.RangePosition);
-			return new DeclarationNode(identifier, nullable, new(token1.RangePosition.Begin, identifier.RangePosition.End));
+			return new DeclarationNode(identifier, nullable, token1.RangePosition >> identifier.RangePosition);
 		}
 
 		walker.Index++;
 		Node value = ExpressionParse(walker);
 
-		return new DeclarationNode(identifier, value, new(token1.RangePosition.Begin, value.RangePosition.End));
+		return new DeclarationNode(identifier, value, token1.RangePosition >> value.RangePosition);
 	}
 
 	private BinaryOperatorNode AssignmentParse(Walker walker)
 	{
-		if (!walker.GetToken(out Token token) || !token.Represents(Types.Identifier)) throw new Issue("Expected identifier", walker.RangePosition.Begin);
+		if (!walker.GetToken(out Token token) || !token.Represents(Types.Identifier)) throw new ExpectedIssue("identifier", walker.RangePosition.Begin);
 		IdentifierNode identifier = new(token.Value, token.RangePosition);
 		walker.Index++;
 
-		if (!walker.GetToken(out Token colonToken) || !colonToken.Represents(Types.Operator, ":")) throw new Issue("Expected ':'", token.RangePosition.End);
+		if (!walker.GetToken(out Token colonToken) || !colonToken.Represents(Types.Operator, ":")) throw new ExpectedIssue(":", token.RangePosition.End);
 		walker.Index++;
 
 		Node value = ExpressionParse(walker);
 
-		return new BinaryOperatorNode(":", identifier, value, identifier.RangePosition.Begin >> value.RangePosition.End);
+		return new BinaryOperatorNode(":", identifier, value, identifier.RangePosition >> value.RangePosition);
 	}
 
 	private Node ExpressionParse(Walker walker)
@@ -106,7 +89,7 @@ public class Parser
 			if (!token.Represents(Types.Operator, "+", "-")) break;
 			walker.Index++;
 			Node right = MultiplicativeParse(walker);
-			left = new BinaryOperatorNode(token.Value, left, right, new(left.RangePosition.Begin, right.RangePosition.End));
+			left = new BinaryOperatorNode(token.Value, left, right, left.RangePosition >> right.RangePosition);
 		}
 		return left;
 	}
@@ -119,7 +102,7 @@ public class Parser
 			if (!token.Represents(Types.Operator, "*", "/")) break;
 			walker.Index++;
 			Node right = UnaryParse(walker);
-			left = new BinaryOperatorNode(token.Value, left, right, new(left.RangePosition.Begin, right.RangePosition.End));
+			left = new BinaryOperatorNode(token.Value, left, right, left.RangePosition >> right.RangePosition);
 		}
 		return left;
 	}
@@ -129,12 +112,12 @@ public class Parser
 		if (!walker.GetToken(out Token token) || !token.Represents(Types.Operator, "+", "-")) return PrimaryParse(walker);
 		walker.Index++;
 		Node target = PrimaryParse(walker);
-		return new UnaryOperatorNode(token.Value, target, new(token.RangePosition.Begin, target.RangePosition.End));
+		return new UnaryOperatorNode(token.Value, target, token.RangePosition >> target.RangePosition);
 	}
 
 	private Node PrimaryParse(Walker walker)
 	{
-		if (!walker.GetToken(out Token token)) throw new Issue("Expected expression", walker.RangePosition.Begin);
+		if (!walker.GetToken(out Token token)) throw new ExpectedIssue("expression", walker.RangePosition.Begin);
 		switch (token.Type)
 		{
 		case Types.Number:
@@ -145,7 +128,7 @@ public class Parser
 		}
 		case Types.String:
 		{
-			ValueNode @string = new(JsonSerializer.Deserialize<string>(token.Value) ?? throw new Issue("Unable to parse string", token.RangePosition.Begin), token.RangePosition);
+			ValueNode @string = new(JsonSerializer.Deserialize<string>(token.Value)!, token.RangePosition);
 			walker.Index++;
 			return @string;
 		}
@@ -155,10 +138,11 @@ public class Parser
 			walker.Index++;
 			if (!walker.GetToken(out Token subtoken) || !subtoken.Represents(Types.Bracket, "(")) return identifier;
 			string open = subtoken.Value;
-			if (!Brackets.TryGetValue(open, out string? close)) throw new Issue($"Unmatched bracket {open}", walker.RangePosition.Begin);
+			if (!Brackets.TryGetValue(open, out string? close)) throw new UnmatchedBracketIssue(open, subtoken.RangePosition);
+
 			IEnumerable<Node> arguments = ArgumentsParse(walker.GetSubwalker(open, close));
 			walker.Index++;
-			return new InvokationNode(identifier, arguments, new(identifier.RangePosition.Begin, arguments.LastOrDefault(identifier).RangePosition.End));
+			return new InvokationNode(identifier, arguments, identifier.RangePosition >> arguments.LastOrDefault(identifier).RangePosition);
 		}
 		case Types.Keyword:
 		{
@@ -177,21 +161,21 @@ public class Parser
 				walker.Index++;
 				return new ValueNode(false, token.RangePosition);
 			}
-			throw new Issue($"Unexpected keyword '{token.Value}'", token.RangePosition.Begin);
+			throw new UnexpectedIssue($"keyword '{token.Value}'", token.RangePosition);
 		}
 		case Types.Bracket:
 		{
 			if (token.Represents("("))
 			{
 				string open = token.Value;
-				if (!Brackets.TryGetValue(open, out string? close)) throw new Issue($"Unmatched bracket {open}", walker.RangePosition.Begin);
+				if (!Brackets.TryGetValue(open, out string? close)) throw new UnmatchedBracketIssue(open, token.RangePosition);
 				Node expression = ExpressionParse(walker.GetSubwalker(open, close));
 				walker.Index++;
 				return expression;
 			}
-			throw new Issue($"Unexpected bracket '{token.Value}'", token.RangePosition.Begin);
+			throw new UnexpectedIssue($"bracket '{token.Value}'", token.RangePosition);
 		}
-		default: throw new Issue($"Unexpected token '{token.Value}'", token.RangePosition.Begin);
+		default: throw new UnexpectedIssue($"token '{token.Value}'", token.RangePosition);
 		}
 	}
 

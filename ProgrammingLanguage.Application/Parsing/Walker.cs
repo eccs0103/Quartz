@@ -6,7 +6,7 @@ using static ProgrammingLanguage.Application.Lexing.Token;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-public class Walker(Token[] tokens, Range<uint> range)
+internal class Walker(Token[] tokens, Range<uint> range)
 {
 	private readonly Token[] Tokens = tokens;
 	public readonly Range<uint> RangeIndex = range;
@@ -19,6 +19,10 @@ public class Walker(Token[] tokens, Range<uint> range)
 	}
 	public bool InRange => Max(RangeIndex.Begin, 0) <= Index && Index < Min(Tokens.Length, RangeIndex.End);
 	public readonly Range<Position> RangePosition = (tokens.FirstOrDefault()?.RangePosition.Begin ?? Position.Zero) >> (tokens.LastOrDefault()?.RangePosition.End ?? Position.Zero);
+
+	public Walker(Token[] tokens) : this(tokens, new(0, Convert.ToUInt32(tokens.Length)))
+	{
+	}
 
 	public bool GetToken(out Token token)
 	{
@@ -53,6 +57,6 @@ public class Walker(Token[] tokens, Range<uint> range)
 			Index = begin;
 			return GetSubwalker(begin, end);
 		}
-		throw new ExpectedIssue(pair, RangePosition.End >> RangePosition.End);
+		throw new ExpectedIssue(pair, RangePosition.End);
 	}
 }

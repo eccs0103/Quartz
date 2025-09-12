@@ -3,7 +3,7 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-public class ValueNode(object? value, Range<Position> range) : Node(range)
+internal class ValueNode(object? value, Range<Position> range) : Node(range)
 {
 	public readonly object? Value = value;
 
@@ -24,7 +24,7 @@ public class ValueNode(object? value, Range<Position> range) : Node(range)
 		return new ValueNode(null, range);
 	}
 
-	public override T Accept<T>(IEvaluatorVisitor<T> visitor)
+	public override T Accept<T>(IResolverVisitor<T> visitor)
 	{
 		return visitor.Visit(this);
 	}

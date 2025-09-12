@@ -3,7 +3,7 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-public class BinaryOperatorNode(string @operator, Node left, Node right, Range<Position> range) : OperatorNode(@operator, range)
+internal class BinaryOperatorNode(string @operator, Node left, Node right, Range<Position> range) : OperatorNode(@operator, range)
 {
 	public readonly Node Left = left;
 	public readonly Node Right = right;
@@ -13,7 +13,7 @@ public class BinaryOperatorNode(string @operator, Node left, Node right, Range<P
 		return $"({Left} {Operator} {Right})";
 	}
 
-	public override T Accept<T>(IEvaluatorVisitor<T> visitor)
+	public override T Accept<T>(IResolverVisitor<T> visitor)
 	{
 		return visitor.Visit(this);
 	}

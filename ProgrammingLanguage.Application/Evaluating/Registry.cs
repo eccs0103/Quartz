@@ -1,6 +1,6 @@
 namespace ProgrammingLanguage.Application.Evaluating;
 
-public class Registry
+internal class Registry
 {
 	private readonly Dictionary<string, Datum> Database = [];
 

@@ -3,7 +3,7 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-public class IdentifierNode(string name, Range<Position> range) : Node(range)
+internal class IdentifierNode(string name, Range<Position> range) : Node(range)
 {
 	public readonly string Name = name;
 
@@ -12,7 +12,7 @@ public class IdentifierNode(string name, Range<Position> range) : Node(range)
 		return $"{Name}";
 	}
 
-	public override T Accept<T>(IEvaluatorVisitor<T> visitor)
+	public override T Accept<T>(IResolverVisitor<T> visitor)
 	{
 		return visitor.Visit(this);
 	}

@@ -7,7 +7,7 @@ using static ProgrammingLanguage.Application.Lexing.Token;
 
 namespace ProgrammingLanguage.Application.Lexing;
 
-public partial class Tokenizer
+internal partial class Tokenizer
 {
 	private static readonly Dictionary<Regex, Types?> Patterns = new()
 	{
@@ -20,6 +20,12 @@ public partial class Tokenizer
 		{ SeparatorPattern(), Types.Separator },
 	};
 	private static readonly HashSet<string> Keywords = ["datum", "null", "import"];
+
+	private static void FixKeyword(ref Types type, string value)
+	{
+		if (type != Types.Identifier || !Keywords.Contains(value)) return;
+		type = Types.Keyword;
+	}
 
 	[GeneratedRegex(@"^\s+", RegexOptions.Compiled)]
 	private static partial Regex WhitespacePattern();
@@ -56,21 +62,19 @@ public partial class Tokenizer
 				(string value, int length) = match;
 				text.Remove(0, length);
 
-				Position end = new MutablePosition(begin).Increment(value).ToImmutable();
+				MutablePosition position = new(begin);
+				Position end = position.Increment(value.Take(length - 1)).ToImmutable();
 				if (unknown is Types type)
 				{
-					if (type == Types.Identifier && Keywords.Contains(value))
-					{
-						type = Types.Keyword;
-					}
+					FixKeyword(ref type, value);
 					tokens.Add(new(type, value, begin >> end));
 				}
-				begin = end;
+				begin = position.Increment(value.TakeLast(1)).ToImmutable();
 
 				hasChanges = true;
 				break;
 			}
-			if (!hasChanges) throw new UnidentifiedTermIssue(begin >> begin);
+			if (!hasChanges) throw new UnidentifiedIssue($"term '{text[0]}'", begin);
 		}
 		return [.. tokens];
 	}

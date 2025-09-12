@@ -3,7 +3,7 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-public class UnaryOperatorNode(string @operator, Node target, Range<Position> range) : OperatorNode(@operator, range)
+internal class UnaryOperatorNode(string @operator, Node target, Range<Position> range) : OperatorNode(@operator, range)
 {
 	public readonly Node Target = target;
 
@@ -12,7 +12,7 @@ public class UnaryOperatorNode(string @operator, Node target, Range<Position> ra
 		return $"({Operator} {Target})";
 	}
 
-	public override T Accept<T>(IEvaluatorVisitor<T> visitor)
+	public override T Accept<T>(IResolverVisitor<T> visitor)
 	{
 		return visitor.Visit(this);
 	}

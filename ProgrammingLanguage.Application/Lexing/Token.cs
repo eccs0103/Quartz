@@ -2,7 +2,7 @@
 
 namespace ProgrammingLanguage.Application.Lexing;
 
-public class Token(Token.Types type, string value, Range<Position> range)
+internal class Token(Token.Types type, string value, Range<Position> range)
 {
 	public enum Types
 	{
