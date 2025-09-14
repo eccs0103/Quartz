@@ -15,15 +15,29 @@ internal class ValueResolver(Registry memory) : IResolverVisitor<ValueNode>
 
 	public ValueNode Visit(IdentifierNode node)
 	{
-		if (!memory.TryRead(node.Name, out object? value)) throw new NotExistIssue($"Identifier '{node.Name}'", node.RangePosition);
-		return new ValueNode(value, node.RangePosition);
+		try
+		{
+			object? value = memory.Read(node.Name);
+			return new ValueNode(value, node.RangePosition);
+		}
+		catch (NullReferenceException)
+		{
+			throw new NotExistIssue($"Identifier '{node.Name}'", node.RangePosition);
+		}
 	}
 
 	public ValueNode Visit(DeclarationNode node)
 	{
-		ValueNode value = node.Value.Accept(this);
-		if (!memory.TryDeclareVariable("Number", node.Identifier.Name, value.Value, out _)) throw new AlreadyExistsIssue($"Identifier '{node.Identifier.Name}'", node.RangePosition.Begin);
-		return ValueNode.NullAt(node.RangePosition);
+		try
+		{
+			ValueNode value = node.Value.Accept(this);
+			memory.DeclareVariable("Number", node.Identifier.Name, value.Value);
+			return ValueNode.NullAt(node.RangePosition);
+		}
+		catch (InvalidOperationException)
+		{
+			throw new AlreadyExistsIssue($"Identifier '{node.Identifier.Name}'", node.RangePosition.Begin);
+		}
 	}
 
 	public ValueNode Visit(InvokationNode node)
@@ -85,8 +99,19 @@ internal class ValueResolver(Registry memory) : IResolverVisitor<ValueNode>
 		{
 			IdentifierNode left = node.Left.Accept(Nominator);
 			ValueNode right = node.Right.Accept(this);
-			if (!memory.TryWrite(left.Name, right.Value)) throw new NotExistIssue($"Identifier '{left.Name}'", left.RangePosition); //throw new Issue($"Identifier '{left.Name}' does not exist or is non-mutable", left.RangePosition);
-			return ValueNode.NullAt(node.RangePosition);
+			try
+			{
+				memory.Assign(left.Name, right.Value);
+				return ValueNode.NullAt(node.RangePosition);
+			}
+			catch (NullReferenceException)
+			{
+				throw new NotExistIssue($"Identifier '{left.Name}'", left.RangePosition); //throw new Issue($"Identifier '{left.Name}' does not exist or is non-mutable", left.RangePosition);
+			}
+			catch (InvalidOperationException)
+			{
+				throw new NotMutableIssue($"Identifier '{left.Name}'", left.RangePosition);
+			}
 		}
 		default: throw new UnidentifiedIssue($"'{node.Operator}' operator", node.RangePosition);
 		}

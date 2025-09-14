@@ -17,12 +17,12 @@ internal class Evaluator
 		Valuator.Nominator = Nominator;
 		Nominator.Valuator = Valuator;
 
-		Memory.TryDeclareType("Type", typeof(Type), out _);
-		Memory.TryDeclareType("Number", typeof(double), out _);
-		Memory.TryDeclareType("Boolean", typeof(bool), out _);
-		Memory.TryDeclareType("String", typeof(string), out _);
-		Memory.TryDeclareConstant("Number", "pi", PI, out _);
-		Memory.TryDeclareConstant("Number", "e", E, out _);
+		Memory.DeclareType("Type", typeof(Type));
+		Memory.DeclareType("Number", typeof(double));
+		Memory.DeclareType("Boolean", typeof(bool));
+		Memory.DeclareType("String", typeof(string));
+		Memory.DeclareConstant("Number", "pi", PI);
+		Memory.DeclareConstant("Number", "e", E);
 	}
 
 	public void Evaluate(IEnumerable<Node> trees)
