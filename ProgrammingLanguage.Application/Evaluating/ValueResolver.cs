@@ -4,7 +4,7 @@ using ProgrammingLanguage.Application.Parsing;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
-internal class ValueResolver(Registry memory) : IResolverVisitor<ValueNode>
+internal class ValueResolver(Dictionary<string, Datum> memory) : IResolverVisitor<ValueNode>
 {
 	public IdentifierResolver Nominator { get; set; } = default!;
 
@@ -15,29 +15,16 @@ internal class ValueResolver(Registry memory) : IResolverVisitor<ValueNode>
 
 	public ValueNode Visit(IdentifierNode node)
 	{
-		try
-		{
-			object? value = memory.Read(node.Name);
-			return new ValueNode(value, node.RangePosition);
-		}
-		catch (NullReferenceException)
-		{
-			throw new NotExistIssue($"Identifier '{node.Name}'", node.RangePosition);
-		}
+		if (!memory.TryGetValue(node.Name, out Datum? datum)) throw new NotExistIssue($"Identifier '{node.Name}'", node.RangePosition);
+		return new(datum.Type, datum.Value, node.RangePosition);
 	}
 
 	public ValueNode Visit(DeclarationNode node)
 	{
-		try
-		{
-			ValueNode value = node.Value.Accept(this);
-			memory.DeclareVariable("Number", node.Identifier.Name, value.Value);
-			return ValueNode.NullAt(node.RangePosition);
-		}
-		catch (InvalidOperationException)
-		{
-			throw new AlreadyExistsIssue($"Identifier '{node.Identifier.Name}'", node.RangePosition.Begin);
-		}
+		ValueNode value = node.Value.Accept(this);
+		Datum constant = new("Number", value.Value, true);
+		if (!memory.TryAdd(node.Identifier.Name, constant)) throw new AlreadyExistsIssue($"Identifier '{node.Identifier.Name}'", node.RangePosition.Begin);
+		return ValueNode.NullAt(node.RangePosition);
 	}
 
 	public ValueNode Visit(InvokationNode node)
@@ -61,8 +48,8 @@ internal class ValueResolver(Registry memory) : IResolverVisitor<ValueNode>
 		ValueNode target = node.Target.Accept(this);
 		switch (node.Operator)
 		{
-		case "+": return new ValueNode(+target.ValueAs<double>(), node.RangePosition >> target.RangePosition);
-		case "-": return new ValueNode(-target.ValueAs<double>(), node.RangePosition >> target.RangePosition);
+		case "+": return new ValueNode("Number", +target.ValueAs<double>(), node.RangePosition >> target.RangePosition);
+		case "-": return new ValueNode("Number", -target.ValueAs<double>(), node.RangePosition >> target.RangePosition);
 		default: throw new UnidentifiedIssue($"'{node.Operator}' operator", node.RangePosition);
 		}
 	}
@@ -75,43 +62,35 @@ internal class ValueResolver(Registry memory) : IResolverVisitor<ValueNode>
 		{
 			ValueNode left = node.Left.Accept(this);
 			ValueNode right = node.Right.Accept(this);
-			return new ValueNode(left.ValueAs<double>() + right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
+			return new ValueNode("Number", left.ValueAs<double>() + right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
 		}
 		case "-":
 		{
 			ValueNode left = node.Left.Accept(this);
 			ValueNode right = node.Right.Accept(this);
-			return new ValueNode(left.ValueAs<double>() - right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
+			return new ValueNode("Number", left.ValueAs<double>() - right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
 		}
 		case "*":
 		{
 			ValueNode left = node.Left.Accept(this);
 			ValueNode right = node.Right.Accept(this);
-			return new ValueNode(left.ValueAs<double>() * right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
+			return new ValueNode("Number", left.ValueAs<double>() * right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
 		}
 		case "/":
 		{
 			ValueNode left = node.Left.Accept(this);
 			ValueNode right = node.Right.Accept(this);
-			return new ValueNode(left.ValueAs<double>() / right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
+			return new ValueNode("Number", left.ValueAs<double>() / right.ValueAs<double>(), left.RangePosition >> right.RangePosition);
 		}
 		case ":":
 		{
 			IdentifierNode left = node.Left.Accept(Nominator);
 			ValueNode right = node.Right.Accept(this);
-			try
-			{
-				memory.Assign(left.Name, right.Value);
-				return ValueNode.NullAt(node.RangePosition);
-			}
-			catch (NullReferenceException)
-			{
-				throw new NotExistIssue($"Identifier '{left.Name}'", left.RangePosition); //throw new Issue($"Identifier '{left.Name}' does not exist or is non-mutable", left.RangePosition);
-			}
-			catch (InvalidOperationException)
-			{
-				throw new NotMutableIssue($"Identifier '{left.Name}'", left.RangePosition);
-			}
+			if (!memory.TryGetValue(left.Name, out Datum? datum)) throw new NotExistIssue($"Identifier '{left.Name}'", left.RangePosition);
+			if (!datum.Mutable) throw new NotMutableIssue($"Identifier '{left.Name}'", left.RangePosition);
+			datum.Value = right.Value;
+			memory[left.Name] = datum;
+			return ValueNode.NullAt(node.RangePosition);
 		}
 		default: throw new UnidentifiedIssue($"'{node.Operator}' operator", node.RangePosition);
 		}

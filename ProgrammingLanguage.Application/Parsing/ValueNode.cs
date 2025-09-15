@@ -3,8 +3,9 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-internal class ValueNode(object? value, Range<Position> range) : Node(range)
+internal class ValueNode(string type, object? value, Range<Position> range) : Node(range)
 {
+	public readonly string Type = type;
 	public readonly object? Value = value;
 
 	public override string ToString()
@@ -14,7 +15,7 @@ internal class ValueNode(object? value, Range<Position> range) : Node(range)
 
 	public static ValueNode NullAt(Range<Position> range)
 	{
-		return new ValueNode(null, range);
+		return new ValueNode("Number", null, range);
 	}
 
 	public override T Accept<T>(IResolverVisitor<T> visitor)

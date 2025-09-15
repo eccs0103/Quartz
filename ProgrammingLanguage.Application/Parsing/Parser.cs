@@ -122,13 +122,15 @@ internal class Parser
 		{
 		case Types.Number:
 		{
-			ValueNode value = new(Convert.ToDouble(token.Value, CultureInfo.GetCultureInfo("en-US")), token.RangePosition);
+			double value = Convert.ToDouble(token.Value, CultureInfo.GetCultureInfo("en-US"));
+			ValueNode number = new("Number", value, token.RangePosition);
 			walker.Index++;
-			return value;
+			return number;
 		}
 		case Types.String:
 		{
-			ValueNode @string = new(JsonSerializer.Deserialize<string>(token.Value)!, token.RangePosition);
+			string value = JsonSerializer.Deserialize<string>(token.Value)!;
+			ValueNode @string = new("String", value, token.RangePosition);
 			walker.Index++;
 			return @string;
 		}
@@ -154,12 +156,12 @@ internal class Parser
 			if (token.Represents("true"))
 			{
 				walker.Index++;
-				return new ValueNode(true, token.RangePosition);
+				return new ValueNode("Boolean", true, token.RangePosition);
 			}
 			if (token.Represents("false"))
 			{
 				walker.Index++;
-				return new ValueNode(false, token.RangePosition);
+				return new ValueNode("Boolean", false, token.RangePosition);
 			}
 			throw new UnexpectedIssue($"keyword '{token.Value}'", token.RangePosition);
 		}
