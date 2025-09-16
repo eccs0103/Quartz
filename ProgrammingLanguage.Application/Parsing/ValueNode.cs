@@ -13,9 +13,9 @@ internal class ValueNode(string type, object? value, Range<Position> range) : No
 		return $"{Value ?? "null"}";
 	}
 
-	public static ValueNode NullAt(Range<Position> range)
+	public static ValueNode NullableAt(string type, Range<Position> range)
 	{
-		return new ValueNode("Number", null, range);
+		return new ValueNode(type, null, range);
 	}
 
 	public override T Accept<T>(IResolverVisitor<T> visitor)

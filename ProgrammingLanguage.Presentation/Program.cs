@@ -8,7 +8,7 @@ class Program
 	private static void Main(string[] args)
 	{
 		Console.ForegroundColor = ConsoleColor.White;
-		Options options = new() { LogLexing = false, LogParsing = true };
+		Options options = new() { LogLexing = false, LogParsing = false };
 		Interpreter interpreter = new(options);
 		foreach (string instruction in GenerateInstructions(args)) interpreter.Run(instruction);
 	}

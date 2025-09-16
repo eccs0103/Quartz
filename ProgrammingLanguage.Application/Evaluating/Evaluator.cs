@@ -1,11 +1,13 @@
+using ProgrammingLanguage.Application.Exceptions;
 using ProgrammingLanguage.Application.Parsing;
+using ProgrammingLanguage.Shared.Helpers;
 using static System.Math;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
 internal class Evaluator
 {
-	private readonly Dictionary<string, Datum> Memory = [];
+	private readonly Registry Memory = new();
 	private readonly ValueResolver Valuator;
 	private readonly IdentifierResolver Nominator;
 
@@ -17,12 +19,12 @@ internal class Evaluator
 		Valuator.Nominator = Nominator;
 		Nominator.Valuator = Valuator;
 
-		// Memory.DeclareType("Type", typeof(Type));
-		// Memory.DeclareType("Number", typeof(double));
-		// Memory.DeclareType("Boolean", typeof(bool));
-		// Memory.DeclareType("String", typeof(string));
-		// Memory.DeclareConstant("Number", "pi", PI);
-		// Memory.DeclareConstant("Number", "e", E);
+		Memory.DeclareType("Type", typeof(Type));
+		Memory.DeclareType("Number", typeof(double));
+		Memory.DeclareType("Boolean", typeof(bool));
+		Memory.DeclareType("String", typeof(string));
+		Memory.DeclareConstant("Number", "pi", PI);
+		Memory.DeclareConstant("Number", "e", E);
 	}
 
 	public void Evaluate(IEnumerable<Node> trees)

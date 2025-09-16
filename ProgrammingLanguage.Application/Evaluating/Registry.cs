@@ -4,17 +4,16 @@ internal class Registry
 {
 	private readonly Dictionary<string, Datum> Database = [];
 
-	public object? Read(string name)
+	public (string, object?) Read(string name)
 	{
 		if (!Database.TryGetValue(name, out Datum? datum)) throw new NullReferenceException();
-		return datum.Value;
+		return (datum.Type, datum.Value);
 	}
 
 	public void Assign(string name, object? value)
 	{
 		if (!Database.TryGetValue(name, out Datum? datum)) throw new NullReferenceException();
 		if (!datum.Mutable) throw new InvalidOperationException();
-		// Type conversation
 		datum.Value = value;
 		Database[name] = datum;
 	}
