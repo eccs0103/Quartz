@@ -52,7 +52,7 @@ internal class Parser
 
 		if (!walker.GetToken(out Token token) || !token.Represents(Types.Operator, ":"))
 		{
-			ValueNode nullable = ValueNode.NullAt(token2.RangePosition);
+			ValueNode nullable = ValueNode.NullableAt("Number", token2.RangePosition);
 			return new DeclarationNode(identifier, nullable, token1.RangePosition >> identifier.RangePosition);
 		}
 
@@ -151,7 +151,7 @@ internal class Parser
 			if (token.Represents("null"))
 			{
 				walker.Index++;
-				return ValueNode.NullAt(token.RangePosition);
+				return ValueNode.NullableAt("Number", token.RangePosition);
 			}
 			if (token.Represents("true"))
 			{
