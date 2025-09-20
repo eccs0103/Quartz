@@ -19,7 +19,7 @@ internal partial class Tokenizer
 		{ BracketsPattern(), Types.Bracket },
 		{ SeparatorPattern(), Types.Separator },
 	};
-	private static readonly HashSet<string> Keywords = ["datum", "null", "import"];
+	private static readonly HashSet<string> Keywords = ["datum", "null", "true", "false"];
 
 	private static void FixKeyword(ref Types type, string value)
 	{
@@ -74,7 +74,7 @@ internal partial class Tokenizer
 				hasChanges = true;
 				break;
 			}
-			if (!hasChanges) throw new UnidentifiedIssue($"term '{text[0]}'", begin);
+			if (!hasChanges) throw new UnidentifiedIssue($"term '{text[0]}'", ~begin);
 		}
 		return [.. tokens];
 	}

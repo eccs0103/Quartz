@@ -1,0 +1,10 @@
+using ProgrammingLanguage.Application.Evaluating;
+using ProgrammingLanguage.Shared.Helpers;
+
+namespace ProgrammingLanguage.Application.Abstractions;
+
+internal interface ITypeContainer
+{
+	public void RegisterType(string name, Structure type, Range<Position> range);
+	public Structure ReadType(string name, Range<Position> range);
+}

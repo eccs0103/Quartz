@@ -206,6 +206,10 @@ csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = true
 
 #### Naming styles ####
+
+# CS9113: Parameter is unread.
+dotnet_diagnostic.CS9113.severity = silent
+
 [*.{cs,vb}]
 
 # Naming rules

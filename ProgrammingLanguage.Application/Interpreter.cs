@@ -19,7 +19,7 @@ public class Interpreter(Interpreter.Options options)
 	private readonly bool LogLexing = options.LogLexing;
 	private readonly bool LogParsing = options.LogParsing;
 
-	public Interpreter() : this(new())
+	public Interpreter() : this(new Options())
 	{
 	}
 

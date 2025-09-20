@@ -3,7 +3,7 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-internal class BinaryOperatorNode(string @operator, Node left, Node right, Range<Position> range) : OperatorNode(@operator, range)
+internal class BinaryOperatorNode(IdentifierNode @operator, Node left, Node right, Range<Position> range) : OperatorNode(@operator, range)
 {
 	public readonly Node Left = left;
 	public readonly Node Right = right;

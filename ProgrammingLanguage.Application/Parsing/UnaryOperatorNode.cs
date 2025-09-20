@@ -3,7 +3,7 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-internal class UnaryOperatorNode(string @operator, Node target, Range<Position> range) : OperatorNode(@operator, range)
+internal class UnaryOperatorNode(IdentifierNode @operator, Node target, Range<Position> range) : OperatorNode(@operator, range)
 {
 	public readonly Node Target = target;
 

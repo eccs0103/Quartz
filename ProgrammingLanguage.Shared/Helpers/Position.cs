@@ -14,7 +14,12 @@ public class Position(in uint column, in uint line)
 
 	public static Range<Position> operator >>(Position from, Position to)
 	{
-		return new(from, to);
+		return new Range<Position>(from, to);
+	}
+
+	public static Range<Position> operator ~(Position position)
+	{
+		return new Range<Position>(position >> position);
 	}
 }
 

@@ -3,9 +3,7 @@ using ProgrammingLanguage.Application.Parsing;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
-#pragma warning disable CS9113 // Parameter is unread.
-internal class IdentifierResolver(Registry memory) : IResolverVisitor<IdentifierNode>
-#pragma warning restore CS9113 // Parameter is unread.
+internal class IdentifierResolver(Module module) : IResolverVisitor<IdentifierNode>
 {
 	public ValueResolver Valuator { get; set; } = default!;
 

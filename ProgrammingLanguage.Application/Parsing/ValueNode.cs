@@ -3,9 +3,9 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
 
-internal class ValueNode(string type, object? value, Range<Position> range) : Node(range)
+internal class ValueNode(string tag, object? value, Range<Position> range) : Node(range)
 {
-	public readonly string Type = type;
+	public readonly string Tag = tag;
 	public readonly object? Value = value;
 
 	public override string ToString()
@@ -13,9 +13,9 @@ internal class ValueNode(string type, object? value, Range<Position> range) : No
 		return $"{Value ?? "null"}";
 	}
 
-	public static ValueNode NullableAt(string type, Range<Position> range)
+	public static ValueNode NullableAt(string tag, Range<Position> range)
 	{
-		return new ValueNode(type, null, range);
+		return new ValueNode(tag, null, range);
 	}
 
 	public override T Accept<T>(IResolverVisitor<T> visitor)

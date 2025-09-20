@@ -1,8 +1,8 @@
 namespace ProgrammingLanguage.Application.Evaluating;
 
-internal class Datum(string type, object? value, bool mutable)
+internal class Datum(string tag, object? value, bool mutable)
 {
-	public readonly string Type = type;
+	public readonly string Tag = tag;
 	private object? _Value = value;
 	public readonly bool Mutable = mutable;
 
@@ -16,7 +16,7 @@ internal class Datum(string type, object? value, bool mutable)
 		}
 	}
 
-	public Datum(string type, object? value) : this(type, value, false)
+	public Datum(string tag, object? value) : this(tag, value, false)
 	{
 	}
 }

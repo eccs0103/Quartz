@@ -57,6 +57,6 @@ internal class Walker(Token[] tokens, Range<uint> range)
 			Index = begin;
 			return GetSubwalker(begin, end);
 		}
-		throw new ExpectedIssue(pair, RangePosition.End);
+		throw new ExpectedIssue(pair, ~RangePosition.End);
 	}
 }
