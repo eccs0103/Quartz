@@ -1,0 +1,15 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Launch",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/ProgrammingLanguage.Presentation/bin/Debug/net8.0/ProgrammingLanguage.Presentation.dll",
+			"args": [ "Code.txt" ],
+			"cwd": "${workspaceFolder}",
+			"console": "externalTerminal"
+		}
+	]
+}

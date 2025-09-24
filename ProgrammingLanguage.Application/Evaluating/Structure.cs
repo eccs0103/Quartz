@@ -11,13 +11,13 @@ internal class Structure(string name, Type equivalent) : Datum("Type", name, equ
 	public Operation RegisterOperation(string name, Function function, Range<Position> range)
 	{
 		Operation operation = new(name, function);
-		if (!Operations.TryAdd(name, operation)) throw new AlreadyExistsIssue($"Operation '{name}'", range);
+		if (!Operations.TryAdd(name, operation)) throw new AlreadyExistsIssue($"Operation '{name}' for {Name}", range);
 		return operation;
 	}
 
 	public Operation ReadOperation(string name, Range<Position> range)
 	{
-		if (!Operations.TryGetValue(name, out Operation? operation)) throw new NotExistIssue($"Operation '{name}'", range);
+		if (!Operations.TryGetValue(name, out Operation? operation)) throw new NotExistIssue($"Operation '{name}' for {Name}", range);
 		return operation;
 	}
 }

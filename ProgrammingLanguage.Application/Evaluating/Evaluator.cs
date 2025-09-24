@@ -1,3 +1,4 @@
+using ProgrammingLanguage.Application.Abstractions;
 using ProgrammingLanguage.Application.Exceptions;
 using ProgrammingLanguage.Application.Parsing;
 using ProgrammingLanguage.Shared.Helpers;
@@ -25,6 +26,7 @@ internal class Evaluator
 	private void ImportCore(Range<Position> range)
 	{
 		ImportType(range);
+		ImportFunction(range);
 		ImportNumber(range);
 		ImportBoolean(range);
 		ImportString(range);
@@ -35,6 +37,11 @@ internal class Evaluator
 	private void ImportType(Range<Position> range)
 	{
 		Module.RegisterType("Type", typeof(Type), range);
+	}
+
+	private void ImportFunction(Range<Position> range)
+	{
+		Module.RegisterType("Function", typeof(Function), range);
 	}
 
 	private void ImportNumber(Range<Position> range)

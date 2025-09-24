@@ -5,22 +5,62 @@ namespace ProgrammingLanguage.Presentation;
 
 class Program
 {
-	private static void Main(string[] args)
+	private static void Main(string[] paths)
 	{
 		Console.ForegroundColor = ConsoleColor.White;
 		Options options = new() { LogLexing = false, LogParsing = false };
 		Interpreter interpreter = new(options);
-		foreach (string instruction in GenerateInstructions(args)) interpreter.Run(instruction);
+
+		foreach (string path in paths)
+		{
+			string? code = Fetch(path);
+			if (code == null) continue;
+			interpreter.Run(code);
+		}
+		foreach (string instruction in ReadInstructions())
+		{
+			interpreter.Run(instruction);
+		}
 	}
 
-	private static IEnumerable<string> GenerateInstructions(IEnumerable<string> initial)
+	private static string? ExternalFetch(string address)
 	{
-		// foreach (string instruction in initial)
-		// {
-		// 	string input = $"import \"{instruction}\";";
-		// 	Console.WriteLine(input);
-		// 	yield return input;
-		// }
+		try
+		{
+			using HttpClient client = new();
+			HttpResponseMessage response = client.GetAsync(address).Result;
+			response.EnsureSuccessStatusCode();
+			return response.Content.ReadAsStringAsync().Result;
+		}
+		catch (Exception exception)
+		{
+			Console.WriteLine(exception.ToString());
+			return null;
+		}
+	}
+
+	private static string? InternalFetch(string address)
+	{
+		try
+		{
+			FileInfo file = new(address);
+			using StreamReader reader = file.OpenText();
+			return reader.ReadToEnd();
+		}
+		catch (Exception exception)
+		{
+			Console.WriteLine(exception.ToString());
+			return null;
+		}
+	}
+
+	private static string? Fetch(string address)
+	{
+		return InternalFetch(address) ?? ExternalFetch(address);
+	}
+
+	private static IEnumerable<string> ReadInstructions()
+	{
 		while (true)
 		{
 			string? input = Console.ReadLine();
