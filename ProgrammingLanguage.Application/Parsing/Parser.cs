@@ -67,15 +67,18 @@ internal class Parser
 		IdentifierNode type = new(token2.Value, token2.RangePosition);
 		walker.Index++;
 
-		if (!walker.GetToken(out Token? token3) || !token3.Represents(Types.Operator, ":"))
+		if (!walker.GetToken(out Token? token3) || !token3.Represents(Types.Bracket, "("))
 		{
 			ValueNode nullable = ValueNode.NullableAt(type.Name, type.RangePosition);
 			return new DeclarationNode(type, identifier, nullable, identifier.RangePosition >> type.RangePosition);
 		}
 
+		string open = token3.Value;
+		if (!Brackets.TryGetValue(open, out string? close)) throw new UnmatchedBracketIssue(open, token3.RangePosition);
+		Node value = ExpressionParse(walker.GetSubwalker(open, close));
+		if (!walker.GetToken(out Token? token4)) throw new ExpectedIssue(close, ~type.RangePosition.End);
 		walker.Index++;
-		Node value = ExpressionParse(walker);
-		return new DeclarationNode(type, identifier, value, identifier.RangePosition >> value.RangePosition);
+		return new DeclarationNode(type, identifier, value, identifier.RangePosition >> token4.RangePosition);
 	}
 
 	private AssignmentNode AssignmentParse(Walker walker)
@@ -161,21 +164,18 @@ internal class Parser
 		{
 			IdentifierNode identifier = new(token.Value, token.RangePosition);
 			walker.Index++;
-			if (!walker.GetToken(out Token? subtoken) || !subtoken.Represents(Types.Bracket, "(")) return identifier;
-			string open = subtoken.Value;
-			if (!Brackets.TryGetValue(open, out string? close)) throw new UnmatchedBracketIssue(open, subtoken.RangePosition);
 
+			if (!walker.GetToken(out Token? token1) || !token1.Represents(Types.Bracket, "(")) return identifier;
+
+			string open = token1.Value;
+			if (!Brackets.TryGetValue(open, out string? close)) throw new UnmatchedBracketIssue(open, token1.RangePosition);
 			IEnumerable<Node> arguments = ArgumentsParse(walker.GetSubwalker(open, close));
+			if (!walker.GetToken(out Token? token2)) throw new ExpectedIssue(close, ~identifier.RangePosition.End);
 			walker.Index++;
-			return new InvokationNode(identifier, arguments, identifier.RangePosition >> arguments.LastOrDefault(identifier).RangePosition);
+			return new InvokationNode(identifier, arguments, identifier.RangePosition >> token2.RangePosition);
 		}
 		case Types.Keyword:
 		{
-			if (token.Represents("null"))
-			{
-				walker.Index++;
-				return ValueNode.NullableAt("Number", token.RangePosition);
-			}
 			if (token.Represents("true"))
 			{
 				walker.Index++;

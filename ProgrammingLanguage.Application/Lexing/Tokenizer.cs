@@ -19,7 +19,7 @@ internal partial class Tokenizer
 		{ BracketsPattern(), Types.Bracket },
 		{ SeparatorPattern(), Types.Separator },
 	};
-	private static readonly HashSet<string> Keywords = ["datum", "null", "true", "false"];
+	private static readonly HashSet<string> Keywords = ["true", "false"];
 
 	private static void FixKeyword(ref Types type, string value)
 	{
@@ -67,7 +67,7 @@ internal partial class Tokenizer
 				if (unknown is Types type)
 				{
 					FixKeyword(ref type, value);
-					tokens.Add(new(type, value, begin >> end));
+					tokens.Add(new Token(type, value, begin >> end));
 				}
 				begin = position.Increment(value.TakeLast(1)).ToImmutable();
 
