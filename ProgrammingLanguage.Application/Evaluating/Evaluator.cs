@@ -51,6 +51,11 @@ internal class Evaluator
 		typeNumber.RegisterOperation("-", NumberMinus, range);
 		typeNumber.RegisterOperation("*", NumberMultiplication, range);
 		typeNumber.RegisterOperation("/", NumberDivision, range);
+		typeNumber.RegisterOperation("=", NumberEqual, range);
+		typeNumber.RegisterOperation("<", NumberLess, range);
+		typeNumber.RegisterOperation("<=", NumberLessOrEqual, range);
+		typeNumber.RegisterOperation(">", NumberGreater, range);
+		typeNumber.RegisterOperation(">=", NumberGreaterOrEqual, range);
 	}
 
 	private ValueNode NumberPlus(IdentifierNode nodeOperand, IEnumerable<Node> arguments, Range<Position> range)
@@ -59,20 +64,20 @@ internal class Evaluator
 		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 0, range);
 		ValueNode nodeLeft = enumerator.Current.Accept(Valuator);
 		if (nodeLeft.Tag != "Number") throw new TypeMismatchIssue(nodeLeft.Tag, "Number", range);
-		if (!enumerator.MoveNext()) return NumberUnaryPlus(nodeLeft, range);
+		if (!enumerator.MoveNext()) return NumberPlus(nodeLeft, range);
 		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
 		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
-		return NumberBinaryPlus(nodeLeft, nodeRight, range);
+		return NumberPlus(nodeLeft, nodeRight, range);
 	}
 
-	private static ValueNode NumberBinaryPlus(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	private static ValueNode NumberPlus(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
 	{
 		double left = nodeLeft.ValueAs<double>();
 		double right = nodeRight.ValueAs<double>();
 		return new ValueNode("Number", left + right, range);
 	}
 
-	private static ValueNode NumberUnaryPlus(ValueNode nodeTarget, Range<Position> range)
+	private static ValueNode NumberPlus(ValueNode nodeTarget, Range<Position> range)
 	{
 		double target = nodeTarget.ValueAs<double>();
 		return new ValueNode("Number", +target, range);
@@ -84,20 +89,20 @@ internal class Evaluator
 		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 0, range);
 		ValueNode nodeLeft = enumerator.Current.Accept(Valuator);
 		if (nodeLeft.Tag != "Number") throw new TypeMismatchIssue(nodeLeft.Tag, "Number", range);
-		if (!enumerator.MoveNext()) return NumberUnaryMinus(nodeLeft, range);
+		if (!enumerator.MoveNext()) return NumberMinus(nodeLeft, range);
 		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
 		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
-		return NumberBinaryMinus(nodeLeft, nodeRight, range);
+		return NumberMinus(nodeLeft, nodeRight, range);
 	}
 
-	private static ValueNode NumberBinaryMinus(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	private static ValueNode NumberMinus(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
 	{
 		double left = nodeLeft.ValueAs<double>();
 		double right = nodeRight.ValueAs<double>();
 		return new ValueNode("Number", left - right, range);
 	}
 
-	private static ValueNode NumberUnaryMinus(ValueNode nodeTarget, Range<Position> range)
+	private static ValueNode NumberMinus(ValueNode nodeTarget, Range<Position> range)
 	{
 		double target = nodeTarget.ValueAs<double>();
 		return new ValueNode("Number", -target, range);
@@ -112,10 +117,10 @@ internal class Evaluator
 		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 1, range);
 		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
 		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
-		return NumberBinaryMultiplication(nodeLeft, nodeRight, range);
+		return NumberMultiplication(nodeLeft, nodeRight, range);
 	}
 
-	private static ValueNode NumberBinaryMultiplication(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	private static ValueNode NumberMultiplication(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
 	{
 		double left = nodeLeft.ValueAs<double>();
 		double right = nodeRight.ValueAs<double>();
@@ -131,14 +136,109 @@ internal class Evaluator
 		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 1, range);
 		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
 		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
-		return NumberBinaryDivision(nodeLeft, nodeRight, range);
+		return NumberDivision(nodeLeft, nodeRight, range);
 	}
 
-	private static ValueNode NumberBinaryDivision(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	private static ValueNode NumberDivision(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
 	{
 		double left = nodeLeft.ValueAs<double>();
 		double right = nodeRight.ValueAs<double>();
 		return new ValueNode("Number", left / right, range);
+	}
+
+	private ValueNode NumberEqual(IdentifierNode nodeOperand, IEnumerable<Node> arguments, Range<Position> range)
+	{
+		IEnumerator<Node> enumerator = arguments.GetEnumerator();
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 0, range);
+		ValueNode nodeLeft = enumerator.Current.Accept(Valuator);
+		if (nodeLeft.Tag != "Number") throw new TypeMismatchIssue(nodeLeft.Tag, "Number", range);
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 1, range);
+		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
+		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
+		return NumberEqual(nodeLeft, nodeRight, range);
+	}
+
+	private static ValueNode NumberEqual(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	{
+		double left = nodeLeft.ValueAs<double>();
+		double right = nodeRight.ValueAs<double>();
+		return new ValueNode("Boolean", left == right, range);
+	}
+
+	private ValueNode NumberLess(IdentifierNode nodeOperand, IEnumerable<Node> arguments, Range<Position> range)
+	{
+		IEnumerator<Node> enumerator = arguments.GetEnumerator();
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 0, range);
+		ValueNode nodeLeft = enumerator.Current.Accept(Valuator);
+		if (nodeLeft.Tag != "Number") throw new TypeMismatchIssue(nodeLeft.Tag, "Number", range);
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 1, range);
+		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
+		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
+		return NumberLess(nodeLeft, nodeRight, range);
+	}
+
+	private static ValueNode NumberLess(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	{
+		double left = nodeLeft.ValueAs<double>();
+		double right = nodeRight.ValueAs<double>();
+		return new ValueNode("Boolean", left < right, range);
+	}
+
+	private ValueNode NumberLessOrEqual(IdentifierNode nodeOperand, IEnumerable<Node> arguments, Range<Position> range)
+	{
+		IEnumerator<Node> enumerator = arguments.GetEnumerator();
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 0, range);
+		ValueNode nodeLeft = enumerator.Current.Accept(Valuator);
+		if (nodeLeft.Tag != "Number") throw new TypeMismatchIssue(nodeLeft.Tag, "Number", range);
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 1, range);
+		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
+		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
+		return NumberLessOrEqual(nodeLeft, nodeRight, range);
+	}
+
+	private static ValueNode NumberLessOrEqual(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	{
+		double left = nodeLeft.ValueAs<double>();
+		double right = nodeRight.ValueAs<double>();
+		return new ValueNode("Boolean", left <= right, range);
+	}
+
+	private ValueNode NumberGreater(IdentifierNode nodeOperand, IEnumerable<Node> arguments, Range<Position> range)
+	{
+		IEnumerator<Node> enumerator = arguments.GetEnumerator();
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 0, range);
+		ValueNode nodeLeft = enumerator.Current.Accept(Valuator);
+		if (nodeLeft.Tag != "Number") throw new TypeMismatchIssue(nodeLeft.Tag, "Number", range);
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 1, range);
+		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
+		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
+		return NumberGreater(nodeLeft, nodeRight, range);
+	}
+
+	private static ValueNode NumberGreater(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	{
+		double left = nodeLeft.ValueAs<double>();
+		double right = nodeRight.ValueAs<double>();
+		return new ValueNode("Boolean", left > right, range);
+	}
+
+	private ValueNode NumberGreaterOrEqual(IdentifierNode nodeOperand, IEnumerable<Node> arguments, Range<Position> range)
+	{
+		IEnumerator<Node> enumerator = arguments.GetEnumerator();
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 0, range);
+		ValueNode nodeLeft = enumerator.Current.Accept(Valuator);
+		if (nodeLeft.Tag != "Number") throw new TypeMismatchIssue(nodeLeft.Tag, "Number", range);
+		if (!enumerator.MoveNext()) throw new NoOverloadIssue(nodeOperand.Name, 1, range);
+		ValueNode nodeRight = enumerator.Current.Accept(Valuator);
+		if (nodeRight.Tag != "Number") throw new TypeMismatchIssue(nodeRight.Tag, "Number", range);
+		return NumberGreaterOrEqual(nodeLeft, nodeRight, range);
+	}
+
+	private static ValueNode NumberGreaterOrEqual(ValueNode nodeLeft, ValueNode nodeRight, Range<Position> range)
+	{
+		double left = nodeLeft.ValueAs<double>();
+		double right = nodeRight.ValueAs<double>();
+		return new ValueNode("Boolean", left >= right, range);
 	}
 
 	private void ImportBoolean(Range<Position> range)

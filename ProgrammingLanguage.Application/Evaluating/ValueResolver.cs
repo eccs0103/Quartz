@@ -68,11 +68,25 @@ internal class ValueResolver(Module module) : IResolverVisitor<ValueNode>
 
 	public ValueNode Visit(BlockNode node)
 	{
-		throw new NotImplementedException();
+		foreach (Node statement in node.Statements)
+		{
+			statement.Accept(this);
+		}
+		return ValueNode.NullableAt("Number", node.RangePosition);
 	}
 
 	public ValueNode Visit(IfStatementNode node)
 	{
-		throw new NotImplementedException();
+		// 1. Вычисляем условие
+		ValueNode condition = node.Condition.Accept(this);
+
+		// 2. Проверяем, что результат - булев тип
+		if (condition.Tag != "Boolean") throw new TypeMismatchIssue("Boolean", condition.Tag, node.Condition.RangePosition);
+
+		// 3. Выполняем нужный блок в зависимости от условия
+		(condition.ValueAs<bool>() ? node.Then : node.Else)?.Accept(this);
+
+		// Конструкция 'if' как инструкция не имеет возвращаемого значения
+		return ValueNode.NullableAt("Number", node.RangePosition);
 	}
 }

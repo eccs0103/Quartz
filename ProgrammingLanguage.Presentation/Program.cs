@@ -8,13 +8,17 @@ class Program
 	private static void Main(string[] paths)
 	{
 		Console.ForegroundColor = ConsoleColor.White;
-		Options options = new() { LogLexing = false, LogParsing = true };
+		Options options = new() { LogLexing = false, LogParsing = false };
 		Interpreter interpreter = new(options);
 
 		foreach (string path in paths)
 		{
 			string? code = Fetch(path);
-			if (code == null) continue;
+			if (code == null)
+			{
+				Console.WriteLine($"Unable to read code at '{path}'");
+				continue;
+			}
 			interpreter.Run(code);
 		}
 		foreach (string instruction in ReadInstructions())
@@ -32,9 +36,8 @@ class Program
 			response.EnsureSuccessStatusCode();
 			return response.Content.ReadAsStringAsync().Result;
 		}
-		catch (Exception exception)
+		catch (Exception)
 		{
-			Console.WriteLine(exception.ToString());
 			return null;
 		}
 	}
@@ -47,9 +50,8 @@ class Program
 			using StreamReader reader = file.OpenText();
 			return reader.ReadToEnd();
 		}
-		catch (Exception exception)
+		catch (Exception)
 		{
-			Console.WriteLine(exception.ToString());
 			return null;
 		}
 	}
