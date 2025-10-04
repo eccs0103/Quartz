@@ -1,29 +1,6 @@
-Vector2 {
-	_x Number;
-	_y Number;
-
-	@getter
-	x() Number {
-		return this._x;
-	};
-
-	@setter
-	x(value Number) {
-		this._x = value;
-	};
-
-	to_string() String {
-		return "";
-	}
-}
-
-
-
-
-
 use { Iterator, Console } from "system";
 use { range } from Iterator;
-use { write } from Console;
+use { read, write } from Console;
 
 Array<T> {
 	swap(index_1 Integer, index_2 Integer) Null {
@@ -45,7 +22,7 @@ Array<Number> {
 
 Developer {
 	main() Null {
-		array Array<Integer>: [8, 15, 32, 4, 0, -5];
+		array Array<Integer>(read("Enter the numbers.").split(", ").map((part) { return Integer(part) }));
 		write(array);
 		array.bubble_sort();
 		write(array);

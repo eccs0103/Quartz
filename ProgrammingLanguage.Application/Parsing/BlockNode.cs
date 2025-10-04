@@ -1,4 +1,4 @@
-using ProgrammingLanguage.Application.Abstractions;
+using ProgrammingLanguage.Application.Evaluating;
 using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
@@ -12,7 +12,7 @@ internal class BlockNode(IEnumerable<Node> statements, Range<Position> range) : 
 		return string.Join('\n', ["{", .. Statements.Select(node => node.ToString()), "}"]);
 	}
 
-	public override T Accept<T>(IResolverVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor)
 	{
 		return visitor.Visit(this);
 	}

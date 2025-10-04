@@ -15,7 +15,7 @@ public class Interpreter(Interpreter.Options options)
 
 	private static readonly Tokenizer Tokenizer = new();
 	private static readonly Parser Parser = new();
-	private static readonly Evaluator Evaluator = new();
+	private static readonly Runtime Runtime = new();
 	private readonly bool LogLexing = options.LogLexing;
 	private readonly bool LogParsing = options.LogParsing;
 
@@ -37,7 +37,7 @@ public class Interpreter(Interpreter.Options options)
 			if (LogParsing && tokens.Length > 0) Console.WriteLine(string.Join('\n', trees));
 
 			Console.ForegroundColor = ConsoleColor.Yellow;
-			Evaluator.Evaluate(trees);
+			Runtime.Evaluate(trees);
 		}
 		catch (Issue issue)
 		{

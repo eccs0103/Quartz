@@ -1,4 +1,4 @@
-using ProgrammingLanguage.Application.Abstractions;
+using ProgrammingLanguage.Application.Evaluating;
 using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
@@ -23,7 +23,7 @@ internal class ValueNode(string tag, object? value, Range<Position> range) : Nod
 		return new ValueNode(tag, null, range);
 	}
 
-	public override T Accept<T>(IResolverVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor)
 	{
 		return visitor.Visit(this);
 	}

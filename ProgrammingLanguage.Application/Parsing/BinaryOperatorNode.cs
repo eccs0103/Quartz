@@ -1,4 +1,4 @@
-using ProgrammingLanguage.Application.Abstractions;
+using ProgrammingLanguage.Application.Evaluating;
 using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Parsing;
@@ -13,7 +13,7 @@ internal class BinaryOperatorNode(IdentifierNode @operator, Node left, Node righ
 		return $"({Left} {Operator} {Right})";
 	}
 
-	public override T Accept<T>(IResolverVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor)
 	{
 		return visitor.Visit(this);
 	}
