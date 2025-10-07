@@ -5,16 +5,24 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
-internal class Scope(string name, Scope? parent = null)
+internal class Scope
 {
 	private readonly Dictionary<string, Property> Properties = [];
-	public readonly string Name = name;
-	public readonly Scope? Parent = parent;
+	public readonly string Name;
+	public readonly Scope? Parent;
+	private readonly string Path;
 
-	public override string ToString()
+	public Scope(string name, Scope? parent = null)
+	{
+		Name = name;
+		Parent = parent;
+		Path = DeterminePath(this);
+	}
+
+	private static string DeterminePath(Scope scope)
 	{
 		StringBuilder builder = new();
-		Scope? current = this;
+		Scope? current = scope;
 		while (true)
 		{
 			builder.Insert(0, current.Name);
@@ -23,6 +31,11 @@ internal class Scope(string name, Scope? parent = null)
 			builder.Insert(0, ".");
 		}
 		return builder.ToString();
+	}
+
+	public override string ToString()
+	{
+		return Path;
 	}
 
 	public Property Register(string name, Property property, Range<Position> range)

@@ -5,7 +5,7 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
-internal delegate ValueNode OperationContent(IEnumerable<ValueNode> arguments, Range<Position> range);
+internal delegate ValueNode OperationContent(ValueNode[] arguments, Range<Position> range);
 
 internal class Operation(string name, IEnumerable<string> parameters, string result, OperationContent function) : Property(name, "Operation", function)
 {
@@ -24,7 +24,7 @@ internal class Operation(string name, IEnumerable<string> parameters, string res
 			if (provided.Tag != expected) throw new TypeMismatchIssue(expected, provided.Tag, provided.RangePosition);
 			results.Add(provided);
 		}
-		ValueNode result = Content.Invoke(results, range);
+		ValueNode result = Content.Invoke([.. results], range);
 		if (result.Tag != Result) throw new TypeMismatchIssue(result.Tag, Result, range);
 		return result;
 	}
