@@ -7,7 +7,7 @@ namespace ProgrammingLanguage.Application.Evaluating;
 internal class Structure(string name, Type equivalent, Scope location) : Property(name, "Type", equivalent)
 {
 	public Type Equivalent => Unsafe.As<Type>(Value);
-	private readonly Scope Scope = new(name, location);
+	public readonly Scope Scope = new(name, location);
 
 	public Property RegisterConstant(string name, string tag, object value, Range<Position> range)
 	{

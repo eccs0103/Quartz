@@ -5,7 +5,7 @@ namespace ProgrammingLanguage.Application.Evaluating;
 
 internal class Module(string name)
 {
-	private readonly Scope Scope = new(name);
+	public readonly Scope Scope = new(name);
 
 	public Structure RegisterType(string name, Type equivalent, Range<Position> range)
 	{

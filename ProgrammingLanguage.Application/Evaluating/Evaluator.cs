@@ -4,10 +4,8 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
-internal class Evaluator(Module module) : IAstVisitor<ValueNode>
+internal class Evaluator(Scope location) : IAstVisitor<ValueNode>
 {
-	private readonly Structure Global = module.ReadType("@Global", ~Position.Zero);
-
 	public ValueNode Visit(ValueNode node)
 	{
 		return node;
@@ -15,7 +13,7 @@ internal class Evaluator(Module module) : IAstVisitor<ValueNode>
 
 	public ValueNode Visit(IdentifierNode node)
 	{
-		Property datum = Global.ReadProperty(node.Name, node.RangePosition);
+		Property datum = location.Resolve(node.Name, node.RangePosition);
 		return new ValueNode(datum.Tag, datum.Value, node.RangePosition);
 	}
 
@@ -25,7 +23,8 @@ internal class Evaluator(Module module) : IAstVisitor<ValueNode>
 		IdentifierNode nodeIdentifier = node.Identifier;
 		ValueNode nodeValue = node.Value.Accept(this);
 		if (nodeType.Name != nodeValue.Tag) throw new TypeMismatchIssue(nodeValue.Tag, nodeType.Name, nodeValue.RangePosition);
-		Global.RegisterVariable(nodeIdentifier.Name, nodeType.Name, nodeValue.Value!, nodeIdentifier.RangePosition);
+		Property variable = new(nodeIdentifier.Name, nodeType.Name, nodeValue.Value!, Property.MutableOptions);
+		location.Register(nodeIdentifier.Name, variable, nodeIdentifier.RangePosition);
 		return ValueNode.NullableAt("Number", node.RangePosition);
 	}
 
@@ -33,7 +32,7 @@ internal class Evaluator(Module module) : IAstVisitor<ValueNode>
 	{
 		IdentifierNode nodeIdentifier = node.Identifier;
 		ValueNode nodeValue = node.Value.Accept(this);
-		Global.WriteProperty(nodeIdentifier.Name, nodeValue.Tag, nodeValue.Value!, nodeIdentifier.RangePosition);
+		location.Write(nodeIdentifier.Name, nodeValue.Tag, nodeValue.Value!, nodeIdentifier.RangePosition);
 		return ValueNode.NullableAt("Number", node.RangePosition);
 	}
 
@@ -41,7 +40,9 @@ internal class Evaluator(Module module) : IAstVisitor<ValueNode>
 	{
 		IdentifierNode nodeTarget = node.Target;
 		IEnumerable<ValueNode> arguments = node.Arguments.Select(argument => argument.Accept(this));
-		Operation operation = Global.ReadOperation(nodeTarget.Name, arguments.Select(result => result.Tag), nodeTarget.RangePosition);
+		Property property = location.Resolve(nodeTarget.Name, nodeTarget.RangePosition);
+		if (property is not OverloadSet set) throw new NotExistIssue($"'{nodeTarget.Name}' is not a function in {location}", nodeTarget.RangePosition);
+		Operation operation = set.ReadOperation(arguments.Select(result => result.Tag), nodeTarget.RangePosition);
 		return operation.Invoke(arguments, node.RangePosition);
 	}
 
@@ -49,10 +50,10 @@ internal class Evaluator(Module module) : IAstVisitor<ValueNode>
 	{
 		IdentifierNode nodeOperator = node.Operator;
 		ValueNode nodeTarget = node.Target.Accept(this);
-		IEnumerable<ValueNode> arguments = [nodeTarget];
-		Structure type = module.ReadType(nodeTarget.Tag, nodeTarget.RangePosition);
-		Operation operation = type.ReadOperation(nodeOperator.Name, arguments.Select(result => result.Tag), nodeOperator.RangePosition);
-		return operation.Invoke(arguments, node.RangePosition);
+		Property property = location.Resolve(nodeTarget.Tag, nodeTarget.RangePosition);
+		if (property is not Structure type) throw new NotExistIssue($"Type '{nodeTarget.Tag}' not found in {location}", nodeTarget.RangePosition);
+		Operation operation = type.ReadOperation(nodeOperator.Name, [nodeTarget.Tag], nodeOperator.RangePosition);
+		return operation.Invoke([nodeTarget], node.RangePosition);
 	}
 
 	public ValueNode Visit(BinaryOperatorNode node)
@@ -60,15 +61,19 @@ internal class Evaluator(Module module) : IAstVisitor<ValueNode>
 		IdentifierNode nodeOperator = node.Operator;
 		ValueNode nodeLeft = node.Left.Accept(this);
 		ValueNode nodeRight = node.Right.Accept(this);
-		IEnumerable<ValueNode> arguments = [nodeLeft, nodeRight];
-		Structure type = module.ReadType(nodeLeft.Tag, nodeLeft.RangePosition);
-		Operation operation = type.ReadOperation(nodeOperator.Name, arguments.Select(result => result.Tag), nodeOperator.RangePosition);
-		return operation.Invoke(arguments, node.RangePosition);
+		Property property = location.Resolve(nodeLeft.Tag, nodeLeft.RangePosition);
+		if (property is not Structure type) throw new NotExistIssue($"Type '{nodeLeft.Tag}' not found in {location}", nodeLeft.RangePosition);
+		Operation operation = type.ReadOperation(nodeOperator.Name, [nodeLeft.Tag, nodeRight.Tag], nodeOperator.RangePosition);
+		return operation.Invoke([nodeLeft, nodeRight], node.RangePosition);
 	}
 
 	public ValueNode Visit(BlockNode node)
 	{
+		Scope blockScope = new("Block", location);
+		Scope oldScope = location;
+		location = blockScope;
 		foreach (Node statement in node.Statements) statement.Accept(this);
+		location = oldScope;
 		return ValueNode.NullableAt("Number", node.RangePosition);
 	}
 

@@ -15,7 +15,8 @@ internal class Runtime
 
 	public void Evaluate(IEnumerable<Node> trees)
 	{
-		Evaluator evaluator = new(Module);
+		Structure global = Module.ReadType("@Global", ~Position.Zero);
+		Evaluator evaluator = new(global.Scope);
 		foreach (Node tree in trees) tree.Accept(evaluator);
 	}
 
@@ -122,7 +123,7 @@ internal class Runtime
 		double right = args[1].ValueAs<double>();
 		return new ValueNode("Boolean", left >= right, range);
 	}
-	
+
 	private static void ImportBoolean(Module module, Range<Position> range)
 	{
 		module.RegisterType("Boolean", typeof(bool), range);
