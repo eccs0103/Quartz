@@ -3,21 +3,20 @@ using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
-internal class Module(string name)
+internal class Module(string name, Scope location) : Symbol(name)
 {
-	private readonly Scope Scope = new(name);
-
-	public Structure RegisterType(string name, Type equivalent, Range<Position> range)
+	public Class RegisterClass(string name, Type equivalent, Range<Position> range)
 	{
-		Structure type = new(name, equivalent, Scope);
-		Scope.Register(name, type, range);
-		return type;
+		Scope scope = new(name, location);
+		Class @class = new(name, equivalent, scope);
+		location.Register(name, @class, range);
+		return @class;
 	}
 
-	public Structure ReadType(string name, Range<Position> range)
+	public Class ReadClass(string name, Range<Position> range)
 	{
-		Property property = Scope.Read(name, range);
-		if (property is not Structure type) throw new NotExistIssue($"Identifier '{name}' in {Scope}", range);
-		return type;
+		Symbol symbol = location.Read(name, range);
+		if (symbol is not Class @class) throw new NotExistIssue($"Class '{name}' in {location}", range);
+		return @class;
 	}
 }

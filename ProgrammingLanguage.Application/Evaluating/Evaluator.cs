@@ -1,6 +1,5 @@
 using ProgrammingLanguage.Application.Exceptions;
 using ProgrammingLanguage.Application.Parsing;
-using ProgrammingLanguage.Shared.Helpers;
 
 namespace ProgrammingLanguage.Application.Evaluating;
 
@@ -11,10 +10,13 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 		return node;
 	}
 
+	// Check
 	public ValueNode Visit(Scope location, IdentifierNode node)
 	{
-		Property datum = location.Read(node.Name, node.RangePosition);
-		return new ValueNode(datum.Tag, datum.Value, node.RangePosition);
+		Symbol symbol = location.Read(node.Name, node.RangePosition);
+		if (symbol is Datum datum) return new ValueNode(datum.Tag, datum.Value, node.RangePosition);
+		if (symbol is Class @class) return new ValueNode("Type", @class.Scope, node.RangePosition);
+		throw new NotExistIssue($"Identifier '{node.Name}' does not resolve to a value or type in {location}", node.RangePosition);
 	}
 
 	public ValueNode Visit(Scope location, DeclarationNode node)
@@ -23,7 +25,7 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 		IdentifierNode nodeIdentifier = node.Identifier;
 		ValueNode nodeValue = node.Value.Accept(this, location);
 		if (nodeType.Name != nodeValue.Tag) throw new TypeMismatchIssue(nodeValue.Tag, nodeType.Name, nodeValue.RangePosition);
-		Property variable = new(nodeIdentifier.Name, nodeType.Name, nodeValue.Value!, Property.MutableOptions);
+		Datum variable = new(nodeIdentifier.Name, nodeType.Name, nodeValue.Value!, true);
 		location.Register(nodeIdentifier.Name, variable, nodeIdentifier.RangePosition);
 		return ValueNode.NullableAt("Number", node.RangePosition);
 	}
@@ -40,9 +42,9 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 	{
 		IdentifierNode nodeTarget = node.Target;
 		IEnumerable<ValueNode> arguments = node.Arguments.Select(argument => argument.Accept(this, location));
-		Property property = location.Read(nodeTarget.Name, nodeTarget.RangePosition);
-		if (property is not OverloadSet set) throw new NotExistIssue($"Function '{nodeTarget.Name}' in {location}", nodeTarget.RangePosition);
-		Operation operation = set.ReadOperation(arguments.Select(result => result.Tag), nodeTarget.RangePosition);
+		Symbol symbol = location.Read(nodeTarget.Name, nodeTarget.RangePosition);
+		if (symbol is not Operator @operator) throw new NotExistIssue($"Operator '{nodeTarget.Name}' in {location}", nodeTarget.RangePosition);
+		Operation operation = @operator.ReadOperation(arguments.Select(result => result.Tag), nodeTarget.RangePosition);
 		return operation.Invoke(arguments, node.RangePosition);
 	}
 
@@ -50,9 +52,10 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 	{
 		IdentifierNode nodeOperator = node.Operator;
 		ValueNode nodeTarget = node.Target.Accept(this, location);
-		Property property = location.Read(nodeTarget.Tag, nodeTarget.RangePosition);
-		if (property is not Structure type) throw new NotExistIssue($"Type '{nodeTarget.Tag}' not found in {location}", nodeTarget.RangePosition);
-		Operation operation = type.ReadOperation(nodeOperator.Name, [nodeTarget.Tag], nodeOperator.RangePosition);
+		Symbol symbol = location.Read(nodeTarget.Tag, nodeTarget.RangePosition);
+		if (symbol is not Class type) throw new NotExistIssue($"Type '{nodeTarget.Tag}' in {location}", nodeTarget.RangePosition);
+		Operator @operator = type.ReadOperator(nodeOperator.Name, nodeOperator.RangePosition);
+		Operation operation = @operator.ReadOperation([nodeTarget.Tag], nodeOperator.RangePosition);
 		return operation.Invoke([nodeTarget], node.RangePosition);
 	}
 
@@ -61,9 +64,10 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 		IdentifierNode nodeOperator = node.Operator;
 		ValueNode nodeLeft = node.Left.Accept(this, location);
 		ValueNode nodeRight = node.Right.Accept(this, location);
-		Property property = location.Read(nodeLeft.Tag, nodeLeft.RangePosition);
-		if (property is not Structure type) throw new NotExistIssue($"Type '{nodeLeft.Tag}' not found in {location}", nodeLeft.RangePosition);
-		Operation operation = type.ReadOperation(nodeOperator.Name, [nodeLeft.Tag, nodeRight.Tag], nodeOperator.RangePosition);
+		Symbol symbol = location.Read(nodeLeft.Tag, nodeLeft.RangePosition);
+		if (symbol is not Class type) throw new NotExistIssue($"Type '{nodeLeft.Tag}' in {location}", nodeLeft.RangePosition);
+		Operator @operator = type.ReadOperator(nodeOperator.Name, nodeOperator.RangePosition);
+		Operation operation = @operator.ReadOperation([nodeLeft.Tag, nodeRight.Tag], nodeOperator.RangePosition);
 		return operation.Invoke([nodeLeft, nodeRight], node.RangePosition);
 	}
 
@@ -78,7 +82,8 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 	{
 		ValueNode condition = node.Condition.Accept(this, location);
 		if (condition.Tag != "Boolean") throw new TypeMismatchIssue("Boolean", condition.Tag, node.Condition.RangePosition);
-		(condition.ValueAs<bool>() ? node.Then : node.Else)?.Accept(this, location);
+		Node? nodeBranch = condition.ValueAs<bool>() ? node.Then : node.Else;
+		nodeBranch?.Accept(this, location);
 		return ValueNode.NullableAt("Number", node.RangePosition);
 	}
 }

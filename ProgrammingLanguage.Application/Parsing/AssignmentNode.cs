@@ -13,9 +13,9 @@ internal class AssignmentNode(IdentifierNode identifier, Node value, Range<Posit
 		return $"({Identifier}: {Value})";
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }
 

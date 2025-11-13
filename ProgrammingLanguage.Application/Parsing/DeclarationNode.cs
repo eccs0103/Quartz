@@ -14,8 +14,8 @@ internal class DeclarationNode(IdentifierNode type, IdentifierNode identifier, N
 		return $"({Identifier} {Type}: {Value})";
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }

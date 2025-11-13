@@ -13,8 +13,8 @@ internal class BinaryOperatorNode(IdentifierNode @operator, Node left, Node righ
 		return $"({Left} {Operator} {Right})";
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }

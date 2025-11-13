@@ -23,8 +23,8 @@ internal class ValueNode(string tag, object? value, Range<Position> range) : Nod
 		return new ValueNode(tag, null, range);
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }

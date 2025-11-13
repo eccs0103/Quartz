@@ -12,8 +12,8 @@ internal class IdentifierNode(string name, Range<Position> range) : Node(range)
 		return $"{Name}";
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }

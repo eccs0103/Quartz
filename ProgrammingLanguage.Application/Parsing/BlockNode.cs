@@ -12,8 +12,8 @@ internal class BlockNode(IEnumerable<Node> statements, Range<Position> range) : 
 		return string.Join('\n', ["{", .. Statements.Select(node => node.ToString()), "}"]);
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }

@@ -12,8 +12,8 @@ internal class UnaryOperatorNode(IdentifierNode @operator, Node target, Range<Po
 		return $"({Operator} {Target})";
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }

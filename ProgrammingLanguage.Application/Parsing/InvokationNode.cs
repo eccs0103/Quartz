@@ -13,8 +13,8 @@ internal class InvokationNode(IdentifierNode target, IEnumerable<Node> arguments
 		return $"{Target}({string.Join(", ", Arguments)})";
 	}
 
-	public override T Accept<T>(IAstVisitor<T> visitor)
+	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
 	{
-		return visitor.Visit(this);
+		return visitor.Visit(location, this);
 	}
 }
