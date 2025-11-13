@@ -5,7 +5,7 @@
 			"label": "build",
 			"command": "dotnet",
 			"type": "process",
-			"args": [ "build", "${workspaceFolder}/ProgrammingLanguage.Presentation/ProgrammingLanguage.Presentation.csproj" ],
+			"args": [ "build", "${workspaceFolder}/Quartz.Presentation/Quartz.Presentation.csproj" ],
 			"problemMatcher": "$msCompile"
 		}
 	]

@@ -1,4 +1,4 @@
-## Programming Language
+## Quartz
 
 Custom simplified programming language model.
 
