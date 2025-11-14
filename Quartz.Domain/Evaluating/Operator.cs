@@ -10,20 +10,17 @@ internal class Operator(string name, Scope location) : Symbol(name)
 		return $"{name}({string.Join(", ", tags)})";
 	}
 
-	public Operation RegisterOperation(IEnumerable<string> parameters, string result, OperationContent function, Range<Position> range)
+	public Operation RegisterOperation(IEnumerable<string> parameters, string result, OperationContent function, Scope scope, Range<Position> range)
 	{
-		string name = Mangle(Name, parameters);
-		Scope scope = location.GetSubscope(name);
-		Operation operation = new(name, parameters, result, function, scope);
-		location.Register(name, operation, range);
+		Operation operation = new(Mangle(Name, parameters), parameters, result, function, scope);
+		location.Register(operation.Name, operation, range);
 		return operation;
 	}
 
 	public Operation ReadOperation(IEnumerable<string> parameters, Range<Position> range)
 	{
-		string name = Mangle(Name, parameters);
-		Symbol symbol = location.Read(name, range);
-		if (symbol is not Operation operation) throw new NotExistIssue($"Operation '{name}' in {location}", range);
+		Symbol symbol = location.Read(Mangle(Name, parameters), range);
+		if (symbol is not Operation operation) throw new NotExistIssue($"Operation '{symbol.Name}' in {location}", range);
 		return operation;
 	}
 }

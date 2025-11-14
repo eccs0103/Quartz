@@ -5,9 +5,8 @@ namespace Quartz.Domain.Evaluating;
 
 internal class Module(string name, Scope location) : Symbol(name)
 {
-	public Class RegisterClass(string name, Range<Position> range)
+	public Class RegisterClass(string name, Scope scope, Range<Position> range)
 	{
-		Scope scope = location.GetSubscope(name);
 		Class @class = new(name, scope);
 		location.Register(name, @class, range);
 		return @class;

@@ -43,7 +43,8 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 		Symbol symbol = location.Read(nodeTarget.Name, nodeTarget.RangePosition);
 		if (symbol is not Operator @operator) throw new NotExistIssue($"Operator '{nodeTarget.Name}' in {location}", nodeTarget.RangePosition);
 		Operation operation = @operator.ReadOperation(arguments.Select(result => result.Tag), nodeTarget.RangePosition);
-		return operation.Invoke(arguments, node.RangePosition);
+		Scope scope = location.GetSubscope("Call");
+		return operation.Invoke(arguments, scope, node.RangePosition);
 	}
 
 	public ValueNode Visit(Scope location, UnaryOperatorNode node)
@@ -54,7 +55,8 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 		if (symbol is not Class type) throw new NotExistIssue($"Type '{nodeTarget.Tag}' in {location}", nodeTarget.RangePosition);
 		Operator @operator = type.ReadOperator(nodeOperator.Name, nodeOperator.RangePosition);
 		Operation operation = @operator.ReadOperation([nodeTarget.Tag], nodeOperator.RangePosition);
-		return operation.Invoke([nodeTarget], node.RangePosition);
+		Scope scope = location.GetSubscope("Call");
+		return operation.Invoke([nodeTarget], scope, node.RangePosition);
 	}
 
 	public ValueNode Visit(Scope location, BinaryOperatorNode node)
@@ -66,7 +68,8 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 		if (symbol is not Class type) throw new NotExistIssue($"Type '{nodeLeft.Tag}' in {location}", nodeLeft.RangePosition);
 		Operator @operator = type.ReadOperator(nodeOperator.Name, nodeOperator.RangePosition);
 		Operation operation = @operator.ReadOperation([nodeLeft.Tag, nodeRight.Tag], nodeOperator.RangePosition);
-		return operation.Invoke([nodeLeft, nodeRight], node.RangePosition);
+		Scope scope = location.GetSubscope("Call");
+		return operation.Invoke([nodeLeft, nodeRight], scope, node.RangePosition);
 	}
 
 	public ValueNode Visit(Scope location, BlockNode node)

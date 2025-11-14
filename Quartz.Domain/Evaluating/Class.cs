@@ -33,8 +33,7 @@ internal class Class(string name, Scope location) : Symbol(name)
 
 	public Operator RegisterOperator(string name, Range<Position> range)
 	{
-		Scope scope = location.GetSubscope(name);
-		Operator @operator = new(name, scope);
+		Operator @operator = new(name, location);
 		location.Register(name, @operator, range);
 		return @operator;
 	}

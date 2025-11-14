@@ -4,14 +4,12 @@ using Quartz.Shared.Helpers;
 
 namespace Quartz.Domain.Evaluating;
 
-internal delegate ValueNode OperationContent(Scope location, ValueNode[] arguments, Range<Position> range);
-
 internal class Operation(string name, IEnumerable<string> parameters, string result, OperationContent content, Scope location) : Symbol(name)
 {
 	public IEnumerable<string> Parameters { get; } = parameters;
 	public string Result { get; } = result;
 
-	public ValueNode Invoke(IEnumerable<ValueNode> arguments, Range<Position> range)
+	public ValueNode Invoke(IEnumerable<ValueNode> arguments, Scope scope, Range<Position> range)
 	{
 		List<ValueNode> results = [];
 		using IEnumerator<ValueNode> iterator = arguments.GetEnumerator();
@@ -22,8 +20,7 @@ internal class Operation(string name, IEnumerable<string> parameters, string res
 			if (provided.Tag != expected) throw new TypeMismatchIssue(expected, provided.Tag, provided.RangePosition);
 			results.Add(provided);
 		}
-		Scope scope = location.GetSubscope("Call");
-		ValueNode result = content.Invoke(scope, [.. results], range);
+		ValueNode result = content.Invoke([.. results], scope, range);
 		if (result.Tag != Result) throw new TypeMismatchIssue(result.Tag, Result, range);
 		return result;
 	}
