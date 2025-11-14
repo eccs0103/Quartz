@@ -1,3 +1,9 @@
+## 0.4.2 (14.11.2025)
+- Improved OOP structure.
+- Added the ability to add primitive blocks.
+- Improved the assignment system.
+- Added `Null` type.
+
 ## 0.4.0 (14.11.2025)
 - Added scopes.
 - Added `if`, `else` operators and their operation with `Boolean` data.
