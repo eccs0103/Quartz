@@ -2,7 +2,7 @@ program
 	= { statement };
 
 statement
-	= ( simple_statement, ";" )
+	= ( [ simple_statement ], ";" )
 	| block
 	| if_statement;
 

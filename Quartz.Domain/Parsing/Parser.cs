@@ -24,14 +24,21 @@ public class Parser
 	{
 		while (walker.InRange)
 		{
-			Node statement = StatementParse(walker);
+			Node? statement = StatementParse(walker);
+			if (statement == null) continue;
 			yield return statement;
 		}
 	}
 
-	private Node StatementParse(Walker walker)
+	private Node? StatementParse(Walker walker)
 	{
 		if (!walker.Peek(out Token? token1)) throw new ExpectedIssue("statement", ~walker.RangePosition.Begin);
+
+		if (token1.Represents(Types.Separator, ";"))
+		{
+			walker.Index++;
+			return null;
+		}
 
 		if (token1.Represents(Types.Keyword, "if")) return IfStatementParse(walker);
 
