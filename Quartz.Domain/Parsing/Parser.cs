@@ -24,20 +24,19 @@ public class Parser
 	{
 		while (walker.InRange)
 		{
-			Node? statement = StatementParse(walker);
-			if (statement == null) continue;
+			Node statement = StatementParse(walker);
 			yield return statement;
 		}
 	}
 
-	private Node? StatementParse(Walker walker)
+	private Node StatementParse(Walker walker)
 	{
 		if (!walker.Peek(out Token? token1)) throw new ExpectedIssue("statement", ~walker.RangePosition.Begin);
 
 		if (token1.Represents(Types.Separator, ";"))
 		{
 			walker.Index++;
-			return null;
+			return new BlockNode([], token1.RangePosition);
 		}
 
 		if (token1.Represents(Types.Keyword, "if")) return IfStatementParse(walker);
@@ -45,11 +44,9 @@ public class Parser
 		if (token1.Represents(Types.Bracket, "{")) return BlockParse(walker);
 
 		Node statement = SimpleStatementParse(walker);
-
 		if (!walker.Peek(out Token? token2)) throw new ExpectedIssue(";", ~walker.RangePosition.End);
 		if (!token2.Represents(Types.Separator, ";")) throw new ExpectedIssue(";", token2.RangePosition);
 		walker.Index++;
-
 		return statement;
 	}
 
@@ -77,18 +74,11 @@ public class Parser
 		Node condition = ExpressionParse(walker.GetSubwalker("(", ")"));
 		walker.Index++;
 
-		BlockNode then = BlockParse(walker);
+		Node then = StatementParse(walker);
 		if (!walker.Peek(out Token? token3) || !token3.Represents(Types.Keyword, "else")) return new IfStatementNode(condition, then, null, token1.RangePosition >> then.RangePosition);
 		walker.Index++;
 
-		Node @else;
-		if (!walker.Peek(out Token? token4) || !token4.Represents(Types.Keyword, "if"))
-		{
-			@else = BlockParse(walker);
-			return new IfStatementNode(condition, then, @else, token1.RangePosition >> @else.RangePosition);
-		}
-
-		@else = IfStatementParse(walker);
+		Node @else = StatementParse(walker);
 		return new IfStatementNode(condition, then, @else, token1.RangePosition >> @else.RangePosition);
 	}
 

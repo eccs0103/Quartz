@@ -12,8 +12,7 @@ simple_statement
 	| expression;
 
 if_statement
-	= "if", "(", expression, ")", block, [ "else", ( if_statement
-	| block ) ];
+	= "if", "(", expression, ")", statement, [ "else", statement ];
 
 block
 	= "{", { statement }, "}";
