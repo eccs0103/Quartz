@@ -1,19 +1,22 @@
 program
-	= { statement, ";" };
+	= { statement };
 
 statement
-	= declaration
-	| assignment
-	| expression
+	= ( simple_statement, ";" )
 	| block
 	| if_statement;
+
+simple_statement
+	= declaration
+	| assignment
+	| expression;
 
 if_statement
 	= "if", "(", expression, ")", block, [ "else", ( if_statement
 	| block ) ];
 
 block
-	= "{", { statement, ";" }, "}";
+	= "{", { statement }, "}";
 
 declaration
 	= identifier, identifier, [ invocation ];

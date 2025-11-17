@@ -26,21 +26,31 @@ public class Parser
 		{
 			Node statement = StatementParse(walker);
 			yield return statement;
-			if (!walker.Peek(out Token? token)) throw new ExpectedIssue(";", ~walker.RangePosition.End);
-			if (!token.Represents(Types.Separator, ";")) throw new ExpectedIssue(";", token.RangePosition);
-			walker.Index++;
 		}
 	}
 
 	private Node StatementParse(Walker walker)
 	{
-		if (!walker.Peek(out Token? token)) throw new ExpectedIssue("statement", ~walker.RangePosition.Begin);
+		if (!walker.Peek(out Token? token1)) throw new ExpectedIssue("statement", ~walker.RangePosition.Begin);
 
-		if (token.Represents(Types.Keyword, "if")) return IfStatementParse(walker);
+		if (token1.Represents(Types.Keyword, "if")) return IfStatementParse(walker);
 
-		if (token.Represents(Types.Bracket, "{")) return BlockParse(walker);
+		if (token1.Represents(Types.Bracket, "{")) return BlockParse(walker);
 
-		if (!token.Represents(Types.Identifier)) return ExpressionParse(walker);
+		Node statement = SimpleStatementParse(walker);
+
+		if (!walker.Peek(out Token? token2)) throw new ExpectedIssue(";", ~walker.RangePosition.End);
+		if (!token2.Represents(Types.Separator, ";")) throw new ExpectedIssue(";", token2.RangePosition);
+		walker.Index++;
+
+		return statement;
+	}
+
+	private Node SimpleStatementParse(Walker walker)
+	{
+		if (!walker.Peek(out Token? token1)) throw new ExpectedIssue("statement", ~walker.RangePosition.Begin);
+
+		if (!token1.Represents(Types.Identifier)) return ExpressionParse(walker);
 
 		if (!walker.Peek(out Token? token2, 1)) return ExpressionParse(walker);
 
