@@ -1,9 +1,7 @@
 name String;
-
 while (true) {
 	name: read("Enter your name: ");
 	if (name != "Arman") continue;
 	break;
 }
-
 write("Hello " + name);

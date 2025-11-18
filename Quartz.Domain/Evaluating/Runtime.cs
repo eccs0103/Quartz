@@ -32,6 +32,18 @@ public class Runtime
 					string right = args[1].ValueAs<string>();
 					return left + right;
 				});
+				type.DeclareOperation("=", ["String", "String"], "Boolean", (args) =>
+				{
+					string left = args[0].ValueAs<string>();
+					string right = args[1].ValueAs<string>();
+					return left == right;
+				});
+				type.DeclareOperation("!=", ["String", "String"], "Boolean", (args) =>
+				{
+					string left = args[0].ValueAs<string>();
+					string right = args[1].ValueAs<string>();
+					return left != right;
+				});
 			});
 			module.DeclareClass("Number", (type) =>
 			{
@@ -74,6 +86,12 @@ public class Runtime
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left == right;
+				});
+				type.DeclareOperation("!=", ["Number", "Number"], "Boolean", (args) =>
+				{
+					double left = args[0].ValueAs<double>();
+					double right = args[1].ValueAs<double>();
+					return left != right;
 				});
 				type.DeclareOperation("<", ["Number", "Number"], "Boolean", (args) =>
 				{

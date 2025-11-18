@@ -224,7 +224,7 @@ public class Parser
 	private Node ComparisonParse(Walker walker)
 	{
 		Node left = AdditiveParse(walker);
-		while (walker.Peek(out Token? token) && token.Represents(Types.Operator, "=", "<", ">", "<=", ">="))
+		while (walker.Peek(out Token? token) && token.Represents(Types.Operator, "!=", "=", "<", ">", "<=", ">="))
 		{
 			IdentifierNode @operator = new(token.Value, token.RangePosition);
 			walker.Index++;
