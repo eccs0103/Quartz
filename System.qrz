@@ -1,6 +1,6 @@
-use { Iterator, Console } from "system";
-use { range } from Iterator;
-use { read, write } from Console;
+from "system" use { Iterator, Console };
+from Iterator use { range };
+from Console use { read, write };
 
 Array<T> {
 	swap(index_1 Integer, index_2 Integer) Null {

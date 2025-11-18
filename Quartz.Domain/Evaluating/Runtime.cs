@@ -10,118 +10,118 @@ public class Runtime
 
 	public Runtime()
 	{
-		Builder.DeclareModule(module =>
+		Builder.DeclareModule((module) =>
 		{
-			module.DeclareClass("Type", type =>
+			module.DeclareClass("Type", (type) =>
 			{
 			});
-			module.DeclareClass("Function", type =>
+			module.DeclareClass("Function", (type) =>
 			{
 			});
-			module.DeclareClass("Null", type =>
+			module.DeclareClass("Null", (type) =>
 			{
 			});
-			module.DeclareClass("Boolean", type =>
+			module.DeclareClass("Boolean", (type) =>
 			{
 			});
-			module.DeclareClass("String", type =>
+			module.DeclareClass("String", (type) =>
 			{
-				type.DeclareOperation("+", ["String", "String"], "String", args =>
+				type.DeclareOperation("+", ["String", "String"], "String", (args) =>
 				{
 					string left = args[0].ValueAs<string>();
 					string right = args[1].ValueAs<string>();
 					return left + right;
 				});
 			});
-			module.DeclareClass("Number", type =>
+			module.DeclareClass("Number", (type) =>
 			{
-				type.DeclareOperation("+", ["Number"], "Number", args =>
+				type.DeclareOperation("+", ["Number"], "Number", (args) =>
 				{
 					double target = args[0].ValueAs<double>();
 					return +target;
 				});
-				type.DeclareOperation("+", ["Number", "Number"], "Number", args =>
+				type.DeclareOperation("+", ["Number", "Number"], "Number", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left + right;
 				});
-				type.DeclareOperation("-", ["Number"], "Number", args =>
+				type.DeclareOperation("-", ["Number"], "Number", (args) =>
 				{
 					double target = args[0].ValueAs<double>();
 					return -target;
 				});
-				type.DeclareOperation("-", ["Number", "Number"], "Number", args =>
+				type.DeclareOperation("-", ["Number", "Number"], "Number", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left - right;
 				});
-				type.DeclareOperation("*", ["Number", "Number"], "Number", args =>
+				type.DeclareOperation("*", ["Number", "Number"], "Number", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left * right;
 				});
-				type.DeclareOperation("/", ["Number", "Number"], "Number", args =>
+				type.DeclareOperation("/", ["Number", "Number"], "Number", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left / right;
 				});
-				type.DeclareOperation("=", ["Number", "Number"], "Boolean", args =>
+				type.DeclareOperation("=", ["Number", "Number"], "Boolean", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left == right;
 				});
-				type.DeclareOperation("<", ["Number", "Number"], "Boolean", args =>
+				type.DeclareOperation("<", ["Number", "Number"], "Boolean", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left < right;
 				});
-				type.DeclareOperation("<=", ["Number", "Number"], "Boolean", args =>
+				type.DeclareOperation("<=", ["Number", "Number"], "Boolean", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left <= right;
 				});
-				type.DeclareOperation(">", ["Number", "Number"], "Boolean", args =>
+				type.DeclareOperation(">", ["Number", "Number"], "Boolean", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left > right;
 				});
-				type.DeclareOperation(">=", ["Number", "Number"], "Boolean", args =>
+				type.DeclareOperation(">=", ["Number", "Number"], "Boolean", (args) =>
 				{
 					double left = args[0].ValueAs<double>();
 					double right = args[1].ValueAs<double>();
 					return left >= right;
 				});
 			});
-			module.DeclareClass(RuntimeBuilder.NameWorkspace, type =>
+			module.DeclareClass(RuntimeBuilder.NameWorkspace, (type) =>
 			{
 				type.DeclareConstant("pi", "Number", PI);
 				type.DeclareConstant("e", "Number", E);
-				type.DeclareOperation("read", ["String"], "String", args =>
+				type.DeclareOperation("read", ["String"], "String", (args) =>
 				{
 					Console.Write(args[0].ValueAs<string>());
 					string? input = Console.ReadLine();
 					ArgumentNullException.ThrowIfNull(input);
 					return input;
 				});
-				type.DeclareOperation("write", ["Number"], "Null", args =>
+				type.DeclareOperation("write", ["Number"], "Null", (args) =>
 				{
 					Console.WriteLine(args[0].ValueAs<string>());
 					return null!;
 				});
-				type.DeclareOperation("write", ["Boolean"], "Null", args =>
+				type.DeclareOperation("write", ["Boolean"], "Null", (args) =>
 				{
 					Console.WriteLine(args[0].ValueAs<string>());
 					return null!;
 				});
-				type.DeclareOperation("write", ["String"], "Null", args =>
+				type.DeclareOperation("write", ["String"], "Null", (args) =>
 				{
 					Console.WriteLine(args[0].ValueAs<string>());
 					return null!;

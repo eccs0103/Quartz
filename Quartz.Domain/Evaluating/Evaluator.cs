@@ -82,10 +82,50 @@ internal class Evaluator() : IAstVisitor<ValueNode>
 
 	public ValueNode Visit(Scope location, IfStatementNode node)
 	{
-		ValueNode condition = node.Condition.Accept(this, location);
-		if (condition.Tag != "Boolean") throw new TypeMismatchIssue("Boolean", condition.Tag, node.Condition.RangePosition);
-		Node? nodeBranch = condition.ValueAs<bool>() ? node.Then : node.Else;
+		ValueNode nodeCondition = node.Condition.Accept(this, location);
+		if (nodeCondition.Tag != "Boolean") throw new TypeMismatchIssue("Boolean", nodeCondition.Tag, nodeCondition.RangePosition);
+		Node? nodeBranch = nodeCondition.ValueAs<bool>() ? node.Then : node.Else;
 		nodeBranch?.Accept(this, location);
 		return ValueNode.NullAt(node.RangePosition);
+	}
+
+	public ValueNode Visit(Scope location, WhileStatementNode node)
+	{
+		while (true)
+		{
+			ValueNode nodeCondition = node.Condition.Accept(this, location);
+			if (nodeCondition.Tag != "Boolean") throw new TypeMismatchIssue("Boolean", nodeCondition.Tag, nodeCondition.RangePosition);
+			if (!nodeCondition.ValueAs<bool>()) break;
+			try { node.Body.Accept(this, location); }
+			catch (ContinueSignal) { continue; }
+			catch (BreakSignal) { break; }
+		}
+		return ValueNode.NullAt(node.RangePosition);
+	}
+
+	public ValueNode Visit(Scope location, RepeatStatementNode node)
+	{
+		ValueNode nodeCount = node.Count.Accept(this, location);
+		if (nodeCount.Tag != "Number") throw new TypeMismatchIssue("Number", nodeCount.Tag, nodeCount.RangePosition);
+		long count = Convert.ToInt64(nodeCount.ValueAs<double>());
+		while (true)
+		{
+			if (count <= 0) break;
+			try { node.Body.Accept(this, location); }
+			catch (ContinueSignal) { continue; }
+			catch (BreakSignal) { break; }
+			count--;
+		}
+		return ValueNode.NullAt(node.RangePosition);
+	}
+
+	public ValueNode Visit(Scope location, BreakStatementNode node)
+	{
+		throw new BreakSignal();
+	}
+
+	public ValueNode Visit(Scope location, ContinueStatementNode node)
+	{
+		throw new ContinueSignal();
 	}
 }

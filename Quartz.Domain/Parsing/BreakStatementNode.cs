@@ -7,7 +7,7 @@ public class BreakStatementNode(Range<Position> range) : Node(range)
 {
 	public override string ToString()
 	{
-		throw new NotImplementedException();
+		return "break";
 	}
 
 	public override T Accept<T>(IAstVisitor<T> visitor, Scope location)
